@@ -34,7 +34,7 @@ MODULE_BOOSTER = 4
 MODULE_SPINNER = 8
 MODULE_MASTERMIND = 16
 
-BUILD_TYPES = ['gui', 'cli', 'mobile']
+BUILD_TYPES = ['cli', 'gui', 'mobile']
 
 for directory in [DATA_DIR, BACKUP_DIR, LOG_DIR, UPDATE_DIR]:
     directory.mkdir(exist_ok=True)
@@ -900,7 +900,7 @@ def check_for_update():
 def download_update():
     try:
         version = request.args.get('version')
-        build_type = request.args.get('build_type', 'gui').lower()
+        build_type = request.args.get('build_type', 'cli').lower()
         
         if not version:
             return jsonify({'error': 'Version parameter required'}), 400
@@ -977,7 +977,7 @@ def upload_new_version():
         version = request.form.get('version')
         changelog = request.form.get('changelog', '')
         required = request.form.get('required', 'false').lower() == 'true'
-        build_type = request.form.get('build_type', 'gui').lower()
+        build_type = request.form.get('build_type', 'cli').lower()
         
         if not version:
             return jsonify({'error': 'Version number required'}), 400
@@ -989,8 +989,8 @@ def upload_new_version():
             return jsonify({'error': f'Invalid build_type. Must be one of: {", ".join(BUILD_TYPES)}'}), 400
 
         extension_map = {
-            'gui': '.exe',
             'cli': '.exe',
+            'gui': '.exe',
             'mobile': '.zip'
         }
 
@@ -1029,6 +1029,133 @@ def upload_new_version():
     except Exception as e:
         logger.error(f'Error uploading new version: {e}')
 
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/create_user', methods=['POST'])
+@require_admin_auth
+def admin_create_user():
+    try:
+        data = request.get_json()
+        permissions = data.get('permissions', 31)
+        
+        api_key = create_user(permissions)
+        
+        if api_key:
+            return jsonify({
+                'api_key': api_key,
+                'permissions': permissions
+            }), 200
+        
+        else:
+            return jsonify({'error': 'Failed to create user'}), 500
+    except Exception as e:
+        logger.error(f'Error in admin_create_user: {e}')
+        
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/users', methods=['GET'])
+@require_admin_auth
+def admin_list_users():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT u.id, u.api_key, u.status, u.permissions, u.bearer_token,
+                   u.tracker_api_keys, u.stalker_api_keys, u.last_connection, u.created_at,
+                   COALESCE(m.tracker_requests, 0) as tracker_requests,
+                   COALESCE(m.stalker_requests, 0) as stalker_requests,
+                   COALESCE(m.booster_requests, 0) as booster_requests,
+                   COALESCE(m.spinner_requests, 0) as spinner_requests,
+                   COALESCE(m.mastermind_requests, 0) as mastermind_requests
+            FROM users u
+            LEFT JOIN module_usage m ON u.id = m.user_id
+            ORDER BY u.id
+        ''')
+        
+        users = []
+        
+        for row in cursor.fetchall():
+            users.append({
+                'id': row[0],
+                'api_key': row[1],
+                'status': row[2],
+                'permissions': row[3],
+                'bearer_token': row[4],
+                'tracker_api_keys': row[5],
+                'stalker_api_keys': row[6],
+                'last_connection': row[7],
+                'created_at': row[8],
+                'usage': {
+                    'tracker': row[9],
+                    'stalker': row[10],
+                    'booster': row[11],
+                    'spinner': row[12],
+                    'mastermind': row[13]
+                }
+            })
+        
+        conn.close()
+        
+        return jsonify({'users': users}), 200
+    except Exception as e:
+        logger.error(f'Error in admin_list_users: {e}')
+        
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/disable_user', methods=['POST'])
+@require_admin_auth
+def admin_disable_user():
+    try:
+        data = request.get_json()
+        api_key = data.get('api_key')
+        
+        if not api_key:
+            return jsonify({'error': 'API key required'}), 400
+        
+        disable_user(api_key)
+        
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        logger.error(f'Error in admin_disable_user: {e}')
+        
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/delete_user', methods=['POST'])
+@require_admin_auth
+def admin_delete_user():
+    try:
+        data = request.get_json()
+        api_key = data.get('api_key')
+        
+        if not api_key:
+            return jsonify({'error': 'API key required'}), 400
+        
+        delete_user(api_key)
+        
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        logger.error(f'Error in admin_delete_user: {e}')
+        
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/set_permissions', methods=['POST'])
+@require_admin_auth
+def admin_set_permissions():
+    try:
+        data = request.get_json()
+        api_key = data.get('api_key')
+        permissions = data.get('permissions')
+        
+        if not api_key or permissions is None:
+            return jsonify({'error': 'API key and permissions required'}), 400
+        
+        set_user_permissions(api_key, permissions)
+        
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        logger.error(f'Error in admin_set_permissions: {e}')
+        
         return jsonify({'error': str(e)}), 500
 
 def calculate_hash(data):
