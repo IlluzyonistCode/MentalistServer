@@ -1643,3 +1643,412 @@ body::before {
         flex-direction: column
     }
 }
+/* Installation Section */
+.installation-section {
+    padding: 6rem 0;
+    position: relative;
+    z-index: 2;
+    background: linear-gradient(180deg, var(--bg-void) 0%, var(--bg-cabinet) 100%);
+}
+
+.section-subtitle {
+    text-align: center;
+    font-size: 1.1rem;
+    color: var(--text-ash);
+    margin-top: 1rem;
+    margin-bottom: 3rem;
+}
+
+.installation-wizard {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: var(--bg-plate);
+    border: 2px solid var(--blood-dried);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow-deep);
+}
+
+.wizard-nav {
+    display: flex;
+    background: var(--bg-cabinet);
+    border-bottom: 2px solid var(--blood-dried);
+    overflow-x: auto;
+}
+
+.wizard-nav-btn {
+    flex: 1;
+    min-width: 150px;
+    padding: 1.5rem 1rem;
+    background: transparent;
+    border: none;
+    border-right: 1px solid var(--blood-dried);
+    color: var(--text-ash);
+    cursor: pointer;
+    transition: all var(--transition);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.wizard-nav-btn:last-child {
+    border-right: none;
+}
+
+.wizard-nav-btn:hover {
+    background: rgba(139, 0, 0, 0.1);
+    color: var(--text-bone);
+}
+
+.wizard-nav-btn.active {
+    background: linear-gradient(135deg, var(--blood-dried) 0%, var(--blood-dark) 100%);
+    color: var(--text-bright);
+}
+
+.wizard-nav-btn .step-num {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg-panel);
+    border: 2px solid var(--blood-arterial);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.wizard-nav-btn.active .step-num {
+    background: var(--blood-bright);
+    border-color: var(--blood-bright);
+    color: var(--text-bright);
+}
+
+.wizard-nav-btn .step-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.wizard-content {
+    padding: 3rem;
+    min-height: 500px;
+}
+
+.wizard-step {
+    display: none;
+    animation: fadeInUp 0.5s ease;
+}
+
+.wizard-step.active {
+    display: block;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.wizard-step .step-icon {
+    font-size: 4rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.wizard-step h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    color: var(--tal-gold);
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.wizard-step p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--text-bone);
+    margin-bottom: 2rem;
+}
+
+.wizard-step code {
+    background: var(--bg-cabinet);
+    color: var(--state-info);
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    border: 1px solid var(--blood-dried);
+}
+
+.step-note, .param-tip {
+    background: rgba(255, 237, 78, 0.1);
+    border-left: 4px solid var(--tal-gold);
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-top: 1.5rem;
+}
+
+.step-note strong, .param-tip strong {
+    color: var(--tal-gold);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.step-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.step-btn {
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, var(--blood-arterial) 0%, var(--blood-bright) 100%);
+    color: var(--text-bright);
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: var(--transition);
+    border: 2px solid transparent;
+}
+
+.step-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(204, 0, 0, 0.3);
+    border-color: var(--blood-bright);
+}
+
+.code-block {
+    position: relative;
+    background: var(--bg-void);
+    border: 2px solid var(--blood-dried);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+}
+
+.code-block pre {
+    color: var(--state-info);
+    font-family: 'Courier New', monospace;
+    font-size: 0.95rem;
+    line-height: 1.8;
+    overflow-x: auto;
+    margin: 0;
+}
+
+.copy-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.5rem 1rem;
+    background: var(--blood-arterial);
+    color: var(--text-bright);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: var(--transition);
+}
+
+.copy-btn:hover {
+    background: var(--blood-bright);
+}
+
+.config-params {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.param-group {
+    background: var(--bg-panel);
+    border: 1px solid var(--blood-dried);
+    border-radius: 10px;
+    padding: 1.5rem;
+}
+
+.param-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.param-header h4 {
+    font-family: 'Courier New', monospace;
+    color: var(--state-info);
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.param-required {
+    background: rgba(204, 0, 0, 0.2);
+    color: var(--state-danger);
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.param-optional {
+    background: rgba(0, 255, 136, 0.1);
+    color: var(--state-success);
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.param-group p {
+    color: var(--text-bone);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.param-group ol {
+    margin-left: 1.5rem;
+    color: var(--text-bone);
+}
+
+.param-group ol li {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+}
+
+.param-group a {
+    color: var(--state-info);
+    text-decoration: none;
+    border-bottom: 1px dashed var(--state-info);
+}
+
+.param-group a:hover {
+    color: var(--tal-gold);
+    border-bottom-color: var(--tal-gold);
+}
+
+.step-success {
+    text-align: center;
+    padding: 3rem;
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.05) 0%, rgba(0, 255, 136, 0.1) 100%);
+    border: 2px solid var(--state-success);
+    border-radius: 15px;
+    margin-top: 2rem;
+}
+
+.success-icon {
+    font-size: 5rem;
+    margin-bottom: 1rem;
+}
+
+.step-success h4 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.8rem;
+    color: var(--state-success);
+    margin-bottom: 1rem;
+}
+
+.step-success p {
+    font-size: 1.1rem;
+    color: var(--text-bone);
+    margin-bottom: 0;
+}
+
+.wizard-controls {
+    display: flex;
+    justify-content: space-between;
+    padding: 2rem 3rem;
+    background: var(--bg-cabinet);
+    border-top: 2px solid var(--blood-dried);
+}
+
+.wizard-btn {
+    padding: 1rem 2.5rem;
+    background: linear-gradient(135deg, var(--blood-arterial) 0%, var(--blood-bright) 100%);
+    color: var(--text-bright);
+    border: 2px solid transparent;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.wizard-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(204, 0, 0, 0.3);
+    border-color: var(--blood-bright);
+}
+
+.wizard-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.wizard-btn.prev {
+    background: linear-gradient(135deg, var(--bg-panel) 0%, var(--bg-tray) 100%);
+    border-color: var(--blood-dried);
+}
+
+.wizard-btn.prev:hover:not(:disabled) {
+    border-color: var(--blood-arterial);
+}
+
+.how-to-get-key {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: var(--bg-panel);
+    border: 1px solid var(--blood-dried);
+    border-radius: 10px;
+}
+
+.how-to-get-key h4 {
+    font-family: 'Cinzel', serif;
+    color: var(--tal-gold);
+    margin-bottom: 1rem;
+}
+
+.how-to-get-key .contact-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin-top: 1rem;
+}
+
+.how-to-get-key .contact-method {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--bg-tray);
+    border: 1px solid var(--blood-dried);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-bone);
+    transition: var(--transition);
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+}
+
+.how-to-get-key .contact-method:hover {
+    background: var(--bg-panel);
+    border-color: var(--blood-arterial);
+    transform: translateX(5px);
+    color: var(--text-bright);
+}
+
+.how-to-get-key .contact-method span:first-child {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}

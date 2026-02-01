@@ -5,6 +5,8 @@ const translations = {
         features: 'Features',
         download: 'Download',
         verifyKey: 'Verify Key',
+        installation: 'Installation',
+        contact: 'Contact',
         heroSubtitle: 'Advanced Intelligence System for Wolvesville',
         aiPoweredAnalysis: 'AI-Powered Analysis',
         realTimeTracking: 'Real-Time Tracking',
@@ -48,15 +50,15 @@ const translations = {
         hmacAuthentication: 'HMAC Authentication',
         hmacAuthDesc: 'Secure challenge-response protocol with SHA256 encryption ensures only authorized users access the system.',
         cloudSynchronization: 'Cloud Synchronization',
-        cloudSyncDesc: 'Access your data from any device with automatic bidirectional sync and SHA256 integrity verification.',
-        multiLayerProtection: 'Multi-Layer Protection',
-        multiLayerDesc: 'Marshal compilation, Zlib compression, and XOR encryption protect the source code from reverse engineering.',
+        cloudSyncDesc: 'Sync your tracking data, profiles, and settings across devices with automatic cloud backup.',
+        advancedEncryption: 'Advanced Encryption',
+        advancedEncryptionDesc: 'All sensitive data is encrypted with AES-256 and stored securely on your device.',
         permissionSystem: 'Permission System',
-        permissionSystemDesc: 'Granular bitmask-based access control allows different subscription tiers for each module.',
+        permissionSystemDesc: 'Flexible subscription tiers grant access to different modules based on your needs.',
         dualInterface: 'Dual Interface',
         dualInterfaceDesc: 'Choose between CLI for speed and minimal resources or GUI for visual elegance and ease of use.',
         autoUpdates: 'Auto Updates',
-        autoUpdatesDesc: 'Built-in update system checks for new versions and downloads updates with SHA256 integrity verification.',
+        autoUpdatesDesc: 'Built-in update system checks for new versions and downloads updates automatically.',
         downloadMentalist: 'Download Mentalist',
         consoleVersion: 'Console Version',
         fastPerformance: 'Fast performance',
@@ -77,19 +79,59 @@ const translations = {
         cloudSyncFeature: 'Cloud sync',
         playAnywhere: 'Play anywhere',
         comingSoon: 'Coming Soon...',
-        version: 'Version: 1.0.0',
-        versionTbd: 'Version: ---',
-        sizeCli: 'Size: ~115MB',
-        sizeGui: 'Size: ~115MB',
-        sizeMobile: 'Size: ---',
+        version: 'Version: ---',
+        versionTbd: 'Version: TBD',
+        sizeCli: 'Size: ---',
+        sizeGui: 'Size: ---',
+        sizeMobile: 'Size: TBD',
         systemRequirements: 'System Requirements',
         os: 'OS:',
         osValue: 'Windows 10+, Linux, macOS',
-        python: 'Python:',
         ram: 'RAM:',
         ramValue: '4GB minimum, 8GB recommended',
         storage: 'Storage:',
-        storageValue: '1GB free space',
+        storageValue: '500MB free space',
+        installationGuide: 'Installation Guide',
+        installationSubtitle: 'Follow these simple steps to get Mentalist up and running',
+        stepCreateFolder: 'Create Folder',
+        stepDownloadExe: 'Download EXE',
+        stepCreateConfig: 'Create Config',
+        stepConfigureParams: 'Configure',
+        stepLaunch: 'Launch',
+        step1Title: 'Step 1: Create Installation Folder',
+        step1Desc: 'Create a new folder anywhere on your PC where Mentalist will be installed. For example: C:\\Mentalist or D:\\Downloads\\Mentalist',
+        note: 'Note:',
+        step1Note: 'Choose a location that\'s easy to remember and has at least 500MB of free space.',
+        step2Title: 'Step 2: Download EXE File',
+        step2Desc: 'Download your preferred version (CLI or GUI) from the Download section above and save it to the folder you created.',
+        goToDownload: 'Go to Download Section',
+        step3Title: 'Step 3: Create Configuration File',
+        step3Desc: 'In the same folder where you saved the EXE, create a new text file named config.txt with the following template:',
+        copyToClipboard: 'Copy to Clipboard',
+        step4Title: 'Step 4: Configure Parameters',
+        step4Intro: 'Replace the placeholder values in config.txt with your actual settings:',
+        requiredForModules: 'Required for Tracker & Stalker',
+        apiKeysDesc: 'To get API keys:',
+        apiKeysStep1: 'Open Wolvesville game',
+        apiKeysStep2: 'Go to Settings → Wolvesville Public API',
+        apiKeysStep3: 'Purchase API key for 100 gems',
+        apiKeysStep4: 'Copy the key and paste it in config.txt',
+        tip: 'Tip:',
+        apiKeysTip: 'You can use multiple keys from different accounts separated by commas for better efficiency.',
+        optional: 'Optional',
+        chromeExecDesc: 'Path to your Chrome browser executable. Leave default if Chrome is installed in the standard location.',
+        chromeViewportDesc: 'Browser window size. You can keep default 958,958 or get your viewport from whatismyviewport.com and enter as width,height',
+        requiredFor: 'Required for Spinner',
+        bluestacksDesc: 'Path to BlueStacks 5 executable and window name. Only needed if you want to use the Spinner module.',
+        serverSyncDesc: 'Enable cloud synchronization. Set to true to sync data across devices or false to keep data local.',
+        requiredIfSync: 'Required if sync enabled',
+        serverUrlDesc: 'Server URL and your personal API key for cloud sync. Contact admin via Instagram or Discord to get your key.',
+        step5Title: 'Step 5: Launch Mentalist',
+        step5Desc: 'Double-click the EXE file to launch Mentalist. Select the module you want to use and enjoy!',
+        installationComplete: 'Installation Complete!',
+        installationCompleteDesc: 'You\'re all set! If you encounter any issues, check the contact section for support.',
+        previous: 'Previous',
+        next: 'Next',
         verifyApiKey: 'Verify API Key',
         checkYourAccess: 'Check Your Access',
         verifyKeyDesc: 'Enter your API key to verify your subscription status and see which modules you have access to.',
@@ -98,19 +140,18 @@ const translations = {
         instantResults: 'Instant Results',
         realTimeValidation: 'Real-time validation',
         apiKey: 'API Key',
-        apiKeyPlaceholder: 'Enter your API key...',
         verifyKeyButton: 'Verify Key',
-        howItWorks: 'How It Works',
-        downloadAndInstall: 'Download & Install',
-        downloadInstallDesc: 'Download your preferred version (CLI or GUI) and install Python dependencies.',
-        configureApiKey: 'Configure API Key',
-        configureApiKeyDesc: 'Add your API key and server URL to config.txt file.',
-        launchAndPlay: 'Launch & Play',
-        launchPlayDesc: 'Run Mentalist, select your module, and start playing with enhanced intelligence.',
+        howToGetKey: 'How to Get API Key',
+        getKeyDesc: 'Contact the administrator to discuss subscription terms and receive your activation key.',
+        contactInstagram: 'Instagram: @killer.wov',
+        contactDiscord: 'Discord: @the_prometh3us',
+        contactUs: 'Contact Us',
+        instagramDesc: 'Follow us for updates, news, and announcements',
+        discordDesc: 'Join our community for support and discussions',
+        email: 'Email',
+        emailDesc: 'Contact us directly for business inquiries',
         product: 'Product',
         support: 'Support',
-        documentation: 'Documentation',
-        contact: 'Contact',
         footerTagline: 'Advanced Intelligence System for Wolvesville',
         footerMade: 'Made with ❤️ by Corruptor',
         verifying: 'Verifying...',
@@ -122,31 +163,7 @@ const translations = {
         permissionLevel: 'Permission Level',
         moduleAccess: 'Module Access',
         errorEnterKey: 'Please enter an API key',
-        errorInvalidKey: 'Invalid API key or server error. Please check your key and try again.',
-        downloadingCli: 'Downloading CLI version...',
-        downloadingGui: 'Downloading GUI version...',
-        downloadingMobile: 'Downloading Mobile version...',
-        downloadError: 'Download failed. Please try again later.',
-        noVersionAvailable: 'No version available for download.',
-        howToGetKey: 'How to Get API Key',
-        getKeyDesc: 'To obtain your personal API key, contact the administrator via Instagram or Discord to discuss terms and receive your activation key.',
-        contactInstagram: 'Instagram: @killer.wov',
-        contactDiscord: 'Discord: @the_prometh3us',
-        documentation: 'Documentation',
-        userGuide: 'User Guide',
-        userGuideDesc: 'Complete guide on how to install, configure, and use all Mentalist modules effectively.',
-        apiReference: 'API Reference',
-        apiRefDesc: 'Technical documentation for developers who want to integrate or extend Mentalist functionality.',
-        faq: 'FAQ',
-        faqDesc: 'Frequently asked questions about installation, configuration, troubleshooting, and usage.',
-        readMore: 'Read More →',
-        contactUs: 'Contact Us',
-        contact: 'Contact',
-        instagramDesc: 'Follow us for updates, news, and announcements',
-        discordDesc: 'Join our community server for support and discussions',
-        joinServer: '@the_prometh3us',
-        email: 'Email',
-        emailDesc: 'Contact us directly for business inquiries'
+        errorInvalidKey: 'Invalid API key or server error. Please check your key and try again.'
     },
     tr: {
         about: 'Hakkında',
@@ -154,6 +171,8 @@ const translations = {
         features: 'Özellikler',
         download: 'İndir',
         verifyKey: 'Anahtar Doğrula',
+        installation: 'Kurulum',
+        contact: 'İletişim',
         heroSubtitle: 'Wolvesville için Gelişmiş İstihbarat Sistemi',
         aiPoweredAnalysis: 'AI Destekli Analiz',
         realTimeTracking: 'Gerçek Zamanlı İzleme',
@@ -197,15 +216,15 @@ const translations = {
         hmacAuthentication: 'HMAC Kimlik Doğrulama',
         hmacAuthDesc: 'SHA256 şifrelemeli güvenli challenge-response protokolü sadece yetkili kullanıcıların sisteme erişmesini sağlar.',
         cloudSynchronization: 'Bulut Senkronizasyonu',
-        cloudSyncDesc: 'Otomatik iki yönlü senkronizasyon ve SHA256 bütünlük doğrulaması ile verilerinize her cihazdan erişin.',
-        multiLayerProtection: 'Çok Katmanlı Koruma',
-        multiLayerDesc: 'Marshal derleme, Zlib sıkıştırma ve XOR şifreleme kaynak kodu tersine mühendislikten korur.',
+        cloudSyncDesc: 'Takip verilerinizi, profillerinizi ve ayarlarınızı cihazlar arasında otomatik bulut yedekleme ile senkronize edin.',
+        advancedEncryption: 'Gelişmiş Şifreleme',
+        advancedEncryptionDesc: 'Tüm hassas veriler AES-256 ile şifrelenir ve cihazınızda güvenli bir şekilde saklanır.',
         permissionSystem: 'İzin Sistemi',
-        permissionSystemDesc: 'Hassas bitmask tabanlı erişim kontrolü her modül için farklı abonelik seviyelerine izin verir.',
+        permissionSystemDesc: 'Esnek abonelik seviyeleri ihtiyaçlarınıza göre farklı modüllere erişim sağlar.',
         dualInterface: 'Çift Arayüz',
         dualInterfaceDesc: 'Hız ve minimal kaynak için CLI veya görsel zarafet ve kullanım kolaylığı için GUI arasında seçim yapın.',
         autoUpdates: 'Otomatik Güncellemeler',
-        autoUpdatesDesc: 'Yerleşik güncelleme sistemi yeni sürümleri kontrol eder ve SHA256 bütünlük doğrulaması ile güncellemeleri indirir.',
+        autoUpdatesDesc: 'Yerleşik güncelleme sistemi yeni sürümleri kontrol eder ve güncellemeleri otomatik olarak indirir.',
         downloadMentalist: 'Mentalist İndir',
         consoleVersion: 'Konsol Sürümü',
         fastPerformance: 'Hızlı performans',
@@ -226,19 +245,59 @@ const translations = {
         cloudSyncFeature: 'Bulut senkronizasyonu',
         playAnywhere: 'Her yerde oyna',
         comingSoon: 'Yakında...',
-        version: 'Versiyon: 1.0.0',
-        versionTbd: 'Versiyon: ---',
-        sizeCli: 'Boyut: ~115MB',
-        sizeGui: 'Boyut: ~115MB',
-        sizeMobile: 'Boyut: ---',
+        version: 'Versiyon: ---',
+        versionTbd: 'Versiyon: Belirlenecek',
+        sizeCli: 'Boyut: ---',
+        sizeGui: 'Boyut: ---',
+        sizeMobile: 'Boyut: Belirlenecek',
         systemRequirements: 'Sistem Gereksinimleri',
         os: 'İS:',
         osValue: 'Windows 10+, Linux, macOS',
-        python: 'Python:',
         ram: 'RAM:',
         ramValue: 'Minimum 4GB, önerilen 8GB',
         storage: 'Depolama:',
-        storageValue: '1GB boş alan',
+        storageValue: '500MB boş alan',
+        installationGuide: 'Kurulum Kılavuzu',
+        installationSubtitle: 'Mentalist\'i çalıştırmak için bu basit adımları izleyin',
+        stepCreateFolder: 'Klasör Oluştur',
+        stepDownloadExe: 'EXE İndir',
+        stepCreateConfig: 'Config Oluştur',
+        stepConfigureParams: 'Yapılandır',
+        stepLaunch: 'Başlat',
+        step1Title: 'Adım 1: Kurulum Klasörü Oluşturma',
+        step1Desc: 'Bilgisayarınızda Mentalist\'in kurulacağı herhangi bir yerde yeni bir klasör oluşturun. Örneğin: C:\\Mentalist veya D:\\Downloads\\Mentalist',
+        note: 'Not:',
+        step1Note: 'Hatırlaması kolay ve en az 500MB boş alana sahip bir konum seçin.',
+        step2Title: 'Adım 2: EXE Dosyasını İndirme',
+        step2Desc: 'Yukarıdaki İndirme bölümünden tercih ettiğiniz sürümü (CLI veya GUI) indirin ve oluşturduğunuz klasöre kaydedin.',
+        goToDownload: 'İndirme Bölümüne Git',
+        step3Title: 'Adım 3: Yapılandırma Dosyası Oluşturma',
+        step3Desc: 'EXE\'yi kaydettiğiniz klasörde, aşağıdaki şablonla config.txt adlı yeni bir metin dosyası oluşturun:',
+        copyToClipboard: 'Panoya Kopyala',
+        step4Title: 'Adım 4: Parametreleri Yapılandırma',
+        step4Intro: 'config.txt dosyasındaki yer tutucu değerleri gerçek ayarlarınızla değiştirin:',
+        requiredForModules: 'Tracker ve Stalker için gerekli',
+        apiKeysDesc: 'API anahtarlarını almak için:',
+        apiKeysStep1: 'Wolvesville oyununu açın',
+        apiKeysStep2: 'Ayarlar → Wolvesville Public API\'ye gidin',
+        apiKeysStep3: '100 kristal karşılığında API anahtarı satın alın',
+        apiKeysStep4: 'Anahtarı kopyalayın ve config.txt\'ye yapıştırın',
+        tip: 'İpucu:',
+        apiKeysTip: 'Daha iyi verimlilik için farklı hesaplardan virgülle ayrılmış birden fazla anahtar kullanabilirsiniz.',
+        optional: 'İsteğe bağlı',
+        chromeExecDesc: 'Chrome tarayıcınızın çalıştırılabilir dosyasının yolu. Chrome standart konuma kuruluysa varsayılan olarak bırakın.',
+        chromeViewportDesc: 'Tarayıcı penceresi boyutu. Varsayılan 958,958\'i tutabilir veya whatismyviewport.com\'dan görünüm alanınızı alıp genişlik,yükseklik olarak girebilirsiniz',
+        requiredFor: 'Spinner için gerekli',
+        bluestacksDesc: 'BlueStacks 5 çalıştırılabilir dosyasının yolu ve pencere adı. Sadece Spinner modülünü kullanmak istiyorsanız gereklidir.',
+        serverSyncDesc: 'Bulut senkronizasyonunu etkinleştirin. Cihazlar arası veri senkronizasyonu için true veya verileri yerel tutmak için false olarak ayarlayın.',
+        requiredIfSync: 'Senkronizasyon etkinse gerekli',
+        serverUrlDesc: 'Sunucu URL\'si ve bulut senkronizasyonu için kişisel API anahtarınız. Anahtarınızı almak için Instagram veya Discord üzerinden yöneticiyle iletişime geçin.',
+        step5Title: 'Adım 5: Mentalist\'i Başlatma',
+        step5Desc: 'Mentalist\'i başlatmak için EXE dosyasına çift tıklayın. Kullanmak istediğiniz modülü seçin ve keyfini çıkarın!',
+        installationComplete: 'Kurulum Tamamlandı!',
+        installationCompleteDesc: 'Her şey hazır! Herhangi bir sorunla karşılaşırsanız, destek için iletişim bölümüne bakın.',
+        previous: 'Önceki',
+        next: 'Sonraki',
         verifyApiKey: 'API Anahtarını Doğrula',
         checkYourAccess: 'Erişiminizi Kontrol Edin',
         verifyKeyDesc: 'Abonelik durumunuzu ve hangi modüllere erişiminiz olduğunu görmek için API anahtarınızı girin.',
@@ -247,19 +306,18 @@ const translations = {
         instantResults: 'Anında Sonuçlar',
         realTimeValidation: 'Gerçek zamanlı doğrulama',
         apiKey: 'API Anahtarı',
-        apiKeyPlaceholder: 'API anahtarınızı girin...',
         verifyKeyButton: 'Anahtarı Doğrula',
-        howItWorks: 'Nasıl Çalışır',
-        downloadAndInstall: 'İndir & Kur',
-        downloadInstallDesc: 'Tercih ettiğiniz sürümü (CLI veya GUI) indirin ve Python bağımlılıklarını kurun.',
-        configureApiKey: 'API Anahtarını Yapılandır',
-        configureApiKeyDesc: 'API anahtarınızı ve sunucu URL\'sini config.txt dosyasına ekleyin.',
-        launchAndPlay: 'Başlat & Oyna',
-        launchPlayDesc: 'Mentalist\'i çalıştırın, modülünüzü seçin ve gelişmiş zeka ile oynamaya başlayın.',
+        howToGetKey: 'API Anahtarı Nasıl Alınır',
+        getKeyDesc: 'Abonelik şartlarını görüşmek ve aktivasyon anahtarınızı almak için yöneticiyle iletişime geçin.',
+        contactInstagram: 'Instagram: @killer.wov',
+        contactDiscord: 'Discord: @the_prometh3us',
+        contactUs: 'Bize Ulaşın',
+        instagramDesc: 'Güncellemeler, haberler ve duyurular için bizi takip edin',
+        discordDesc: 'Destek ve tartışmalar için topluluğumuza katılın',
+        email: 'E-posta',
+        emailDesc: 'İş soruşturmaları için doğrudan bize ulaşın',
         product: 'Ürün',
         support: 'Destek',
-        documentation: 'Dokümantasyon',
-        contact: 'İletişim',
         footerTagline: 'Wolvesville için Gelişmiş İstihbarat Sistemi',
         footerMade: '❤️ ile Corruptor tarafından yapıldı',
         verifying: 'Doğrulanıyor...',
@@ -271,29 +329,7 @@ const translations = {
         permissionLevel: 'İzin Seviyesi',
         moduleAccess: 'Modül Erişimi',
         errorEnterKey: 'Lütfen bir API anahtarı girin',
-        errorInvalidKey: 'Geçersiz API anahtarı veya sunucu hatası. Lütfen anahtarınızı kontrol edin ve tekrar deneyin.',
-        downloadingCli: 'CLI sürümü indiriliyor...',
-        downloadingGui: 'GUI sürümü indiriliyor...',
-        downloadingMobile: 'Mobil sürüm indiriliyor...',
-        downloadError: 'İndirme başarısız. Lütfen daha sonra tekrar deneyin.',
-        noVersionAvailable: 'İndirme için uygun sürüm yok.',
-        howToGetKey: 'API Anahtarı Nasıl Alınır',
-        getKeyDesc: 'Kişisel API anahtarınızı almak için şartları görüşmek ve aktivasyon anahtarınızı almak üzere Instagram veya Discord üzerinden yönetici ile iletişime geçin.',
-        contactInstagram: 'Instagram: @killer.wov',
-        contactDiscord: 'Discord: @the_prometh3us',
-        userGuide: 'Kullanım Kılavuzu',
-        userGuideDesc: 'Tüm Mentalist modüllerinin nasıl kurulacağı, yapılandırılacağı ve etkili kullanılacağı hakkında eksiksiz kılavuz.',
-        apiReference: 'API Referansı',
-        apiRefDesc: 'Mentalist işlevselliğini entegre etmek veya genişletmek isteyen geliştiriciler için teknik dokümantasyon.',
-        faq: 'SSS',
-        faqDesc: 'Kurulum, yapılandırma, sorun giderme ve kullanım hakkında sıkça sorulan sorular.',
-        readMore: 'Devamını Oku →',
-        contactUs: 'Bize Ulaşın',
-        instagramDesc: 'Güncellemeler, haberler ve duyurular için bizi takip edin',
-        discordDesc: 'Destek ve tartışmalar için topluluk sunucumuza katılın',
-        joinServer: '@the_prometh3us',
-        email: 'E-posta',
-        emailDesc: 'İş soruşturmaları için doğrudan bize ulaşın'
+        errorInvalidKey: 'Geçersiz API anahtarı veya sunucu hatası. Lütfen anahtarınızı kontrol edin ve tekrar deneyin.'
     },
     ru: {
         about: 'О программе',
@@ -301,6 +337,8 @@ const translations = {
         features: 'Возможности',
         download: 'Скачать',
         verifyKey: 'Проверить ключ',
+        installation: 'Установка',
+        contact: 'Контакты',
         heroSubtitle: 'Продвинутая система анализа для Wolvesville',
         aiPoweredAnalysis: 'ИИ-анализ',
         realTimeTracking: 'Отслеживание в реальном времени',
@@ -344,19 +382,19 @@ const translations = {
         hmacAuthentication: 'HMAC-аутентификация',
         hmacAuthDesc: 'Безопасный протокол challenge-response с шифрованием SHA256 гарантирует, что только авторизованные пользователи получают доступ к системе.',
         cloudSynchronization: 'Облачная синхронизация',
-        cloudSyncDesc: 'Доступ к вашим данным с любого устройства с автоматической двунаправленной синхронизацией и проверкой целостности SHA256.',
-        multiLayerProtection: 'Многоуровневая защита',
-        multiLayerDesc: 'Компиляция Marshal, сжатие Zlib и шифрование XOR защищают исходный код от обратной разработки.',
+        cloudSyncDesc: 'Синхронизируйте данные отслеживания, профили и настройки между устройствами с автоматическим облачным резервным копированием.',
+        advancedEncryption: 'Продвинутое шифрование',
+        advancedEncryptionDesc: 'Все конфиденциальные данные зашифрованы с помощью AES-256 и надежно хранятся на вашем устройстве.',
         permissionSystem: 'Система разрешений',
-        permissionSystemDesc: 'Детальный контроль доступа на основе битовых масок позволяет использовать разные уровни подписки для каждого модуля.',
+        permissionSystemDesc: 'Гибкие уровни подписки предоставляют доступ к различным модулям в зависимости от ваших потребностей.',
         dualInterface: 'Двойной интерфейс',
         dualInterfaceDesc: 'Выбирайте между CLI для скорости и минимальных ресурсов или GUI для визуальной элегантности и простоты использования.',
         autoUpdates: 'Автообновления',
-        autoUpdatesDesc: 'Встроенная система обновлений проверяет наличие новых версий и загружает обновления с проверкой целостности SHA256.',
+        autoUpdatesDesc: 'Встроенная система обновлений проверяет наличие новых версий и автоматически загружает обновления.',
         downloadMentalist: 'Скачать Mentalist',
         consoleVersion: 'Консольная версия',
         fastPerformance: 'Быстрая производительность',
-        minimalResources: 'Минимум ресурсов',
+        minimalResources: 'Минимальные ресурсы',
         commandLineInterface: 'Интерфейс командной строки',
         forAdvancedUsers: 'Для продвинутых пользователей',
         downloadCli: 'Скачать CLI',
@@ -369,44 +407,83 @@ const translations = {
         downloadGui: 'Скачать GUI',
         mobileVersion: 'Мобильная версия',
         androidSupport: 'Поддержка Android',
-        touchOptimized: 'Оптимизировано для сенсоров',
+        touchOptimized: 'Оптимизация для сенсорного управления',
         cloudSyncFeature: 'Облачная синхронизация',
         playAnywhere: 'Играйте где угодно',
         comingSoon: 'Скоро...',
-        version: 'Версия: 1.0.0',
+        version: 'Версия: ---',
         versionTbd: 'Версия: ---',
-        sizeCli: 'Размер: ~115MB',
-        sizeGui: 'Размер: ~115MB',
+        sizeCli: 'Размер: ---',
+        sizeGui: 'Размер: ---',
         sizeMobile: 'Размер: ---',
         systemRequirements: 'Системные требования',
         os: 'ОС:',
         osValue: 'Windows 10+, Linux, macOS',
-        python: 'Python:',
         ram: 'ОЗУ:',
-        ramValue: 'Минимум 4GB, рекомендуется 8GB',
+        ramValue: 'Минимум 4ГБ, рекомендуется 8ГБ',
         storage: 'Хранилище:',
-        storageValue: '1GB свободного места',
-        verifyApiKey: 'Проверить API-ключ',
-        checkYourAccess: 'Проверьте свой доступ',
-        verifyKeyDesc: 'Введите свой API-ключ, чтобы проверить статус подписки и увидеть, к каким модулям у вас есть доступ.',
+        storageValue: '500МБ свободного места',
+        installationGuide: 'Руководство по установке',
+        installationSubtitle: 'Следуйте этим простым шагам, чтобы запустить Mentalist',
+        stepCreateFolder: 'Создать папку',
+        stepDownloadExe: 'Скачать EXE',
+        stepCreateConfig: 'Создать конфиг',
+        stepConfigureParams: 'Настроить',
+        stepLaunch: 'Запустить',
+        step1Title: 'Шаг 1: Создание папки для установки',
+        step1Desc: 'Создайте новую папку в любом месте на вашем ПК, где будет установлен Mentalist. Например: C:\\Mentalist или D:\\Downloads\\Mentalist',
+        note: 'Примечание:',
+        step1Note: 'Выберите место, которое легко запомнить и где есть не менее 500МБ свободного места.',
+        step2Title: 'Шаг 2: Скачивание EXE файла',
+        step2Desc: 'Скачайте предпочитаемую версию (CLI или GUI) из раздела загрузки выше и сохраните в созданную папку.',
+        goToDownload: 'Перейти к разделу загрузки',
+        step3Title: 'Шаг 3: Создание файла конфигурации',
+        step3Desc: 'В той же папке, где вы сохранили EXE, создайте новый текстовый файл с именем config.txt со следующим шаблоном:',
+        copyToClipboard: 'Скопировать в буфер обмена',
+        step4Title: 'Шаг 4: Настройка параметров',
+        step4Intro: 'Замените значения-заполнители в config.txt на ваши фактические настройки:',
+        requiredForModules: 'Требуется для Tracker и Stalker',
+        apiKeysDesc: 'Чтобы получить API ключи:',
+        apiKeysStep1: 'Откройте игру Wolvesville',
+        apiKeysStep2: 'Перейдите в Настройки → Wolvesville Public API',
+        apiKeysStep3: 'Купите API ключ за 100 кристаллов',
+        apiKeysStep4: 'Скопируйте ключ и вставьте его в config.txt',
+        tip: 'Совет:',
+        apiKeysTip: 'Вы можете использовать несколько ключей из разных аккаунтов, разделенных запятыми, для лучшей эффективности.',
+        optional: 'Необязательно',
+        chromeExecDesc: 'Путь к исполняемому файлу вашего браузера Chrome. Оставьте по умолчанию, если Chrome установлен в стандартном месте.',
+        chromeViewportDesc: 'Размер окна браузера. Можно оставить по умолчанию 958,958 или получить ваш viewport с сайта whatismyviewport.com и ввести как ширина,высота',
+        requiredFor: 'Требуется для Spinner',
+        bluestacksDesc: 'Путь к исполняемому файлу BlueStacks 5 и имя окна. Требуется только если вы хотите использовать модуль Spinner.',
+        serverSyncDesc: 'Включить облачную синхронизацию. Установите true для синхронизации данных между устройствами или false для хранения данных локально.',
+        requiredIfSync: 'Требуется если синхронизация включена',
+        serverUrlDesc: 'URL сервера и ваш персональный API ключ для облачной синхронизации. Свяжитесь с администратором через Instagram или Discord чтобы получить ключ.',
+        step5Title: 'Шаг 5: Запуск Mentalist',
+        step5Desc: 'Дважды кликните на EXE файл для запуска Mentalist. Выберите модуль который хотите использовать и наслаждайтесь!',
+        installationComplete: 'Установка завершена!',
+        installationCompleteDesc: 'Всё готово! Если возникнут проблемы, обратитесь в раздел контактов для поддержки.',
+        previous: 'Назад',
+        next: 'Далее',
+        verifyApiKey: 'Проверить API ключ',
+        checkYourAccess: 'Проверьте ваш доступ',
+        verifyKeyDesc: 'Введите ваш API ключ для проверки статуса подписки и просмотра доступных модулей.',
         secureVerification: 'Безопасная проверка',
         hmacSha256Protocol: 'Протокол HMAC-SHA256',
         instantResults: 'Мгновенные результаты',
         realTimeValidation: 'Проверка в реальном времени',
-        apiKey: 'API-ключ',
-        apiKeyPlaceholder: 'Введите ваш API-ключ...',
+        apiKey: 'API ключ',
         verifyKeyButton: 'Проверить ключ',
-        howItWorks: 'Как это работает',
-        downloadAndInstall: 'Скачать и установить',
-        downloadInstallDesc: 'Скачайте предпочитаемую версию (CLI или GUI) и установите зависимости Python.',
-        configureApiKey: 'Настроить API-ключ',
-        configureApiKeyDesc: 'Добавьте свой API-ключ и URL сервера в файл config.txt.',
-        launchAndPlay: 'Запустить и играть',
-        launchPlayDesc: 'Запустите Mentalist, выберите свой модуль и начните играть с улучшенным интеллектом.',
+        howToGetKey: 'Как получить API ключ',
+        getKeyDesc: 'Свяжитесь с администратором для обсуждения условий подписки и получения ключа активации.',
+        contactInstagram: 'Instagram: @killer.wov',
+        contactDiscord: 'Discord: @the_prometh3us',
+        contactUs: 'Свяжитесь с нами',
+        instagramDesc: 'Подписывайтесь на обновления, новости и объявления',
+        discordDesc: 'Присоединяйтесь к нашему сообществу для поддержки и обсуждений',
+        email: 'Email',
+        emailDesc: 'Свяжитесь с нами напрямую по деловым вопросам',
         product: 'Продукт',
         support: 'Поддержка',
-        documentation: 'Документация',
-        contact: 'Контакты',
         footerTagline: 'Продвинутая система анализа для Wolvesville',
         footerMade: 'Сделано с ❤️ от Corruptor',
         verifying: 'Проверка...',
@@ -417,57 +494,10 @@ const translations = {
         active: 'Активен',
         permissionLevel: 'Уровень разрешений',
         moduleAccess: 'Доступ к модулям',
-        errorEnterKey: 'Пожалуйста, введите API-ключ',
-        errorInvalidKey: 'Неверный API-ключ или ошибка сервера. Пожалуйста, проверьте свой ключ и попробуйте снова.',
-        downloadingCli: 'Скачивается CLI версия...',
-        downloadingGui: 'Скачивается GUI версия...',
-        downloadingMobile: 'Скачивается мобильная версия...',
-        downloadError: 'Ошибка загрузки. Пожалуйста, попробуйте позже.',
-        noVersionAvailable: 'Нет доступной версии для загрузки.',
-        howToGetKey: 'Как получить API-ключ',
-        getKeyDesc: 'Чтобы получить личный API-ключ, свяжитесь с администратором через Instagram или Discord для обсуждения условий и получения ключа активации.',
-        contactInstagram: 'Instagram: @killer.wov',
-        contactDiscord: 'Discord: @the_prometh3us',
-        userGuide: 'Руководство пользователя',
-        userGuideDesc: 'Полное руководство по установке, настройке и эффективному использованию всех модулей Mentalist.',
-        apiReference: 'Справочник API',
-        apiRefDesc: 'Техническая документация для разработчиков, которые хотят интегрировать или расширить функциональность Mentalist.',
-        faq: 'FAQ',
-        faqDesc: 'Часто задаваемые вопросы об установке, настройке, устранении неполадок и использовании.',
-        readMore: 'Читать далее →',
-        contactUs: 'Свяжитесь с нами',
-        instagramDesc: 'Следите за обновлениями, новостями и объявлениями',
-        discordDesc: 'Присоединяйтесь к нашему серверу сообщества для поддержки и обсуждений',
-        joinServer: '@the_prometh3us',
-        email: 'Email',
-        emailDesc: 'Свяжитесь с нами напрямую по бизнес-вопросам'
+        errorEnterKey: 'Пожалуйста, введите API ключ',
+        errorInvalidKey: 'Неверный API ключ или ошибка сервера. Проверьте ключ и попробуйте снова.'
     }
 };
-
-let currentLang = 'en';
-
-function switchLanguage(lang) {
-    currentLang = lang;
-    const t = translations[lang];
-
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        
-        if (t[key]) el.textContent = t[key];
-    });
-
-    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-        const key = el.getAttribute('data-i18n-placeholder');
-
-        if (t[key]) el.placeholder = t[key];
-    });
-
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.lang === lang);
-    });
-
-    loadVersionInfo();
-}
 
 const moduleDetails = {
     tracker: {
@@ -642,38 +672,7 @@ const moduleDetails = {
     }
 };
 
-function openModal(moduleKey) {
-    const modal = document.getElementById('moduleModal');
-    const modalContent = modal.querySelector('.modal-body');
-    const module = moduleDetails[moduleKey];
-    const t = translations[currentLang];
-
-    if (!module) return;
-
-    const title = module.title;
-    const description = module.description[currentLang];
-    const features = module.features[currentLang];
-
-    modalContent.innerHTML = `
-        <h2>${title}</h2>
-        <p class='module-description'>${description}</p>
-        <h3>${t.keyFeatures}</h3>
-        <ul class='feature-list'>
-            ${features.map(f => `<li>${f}</li>`).join('')}
-        </ul>
-    `;
-
-    modal.classList.add('active');
-
-    document.body.style.overflow = 'hidden';
-}
-
-function closeModal() {
-    const modal = document.getElementById('moduleModal');
-    modal.classList.remove('active');
-
-    document.body.style.overflow = '';
-}
+let currentLang = 'en';
 
 function initParticles() {
     const canvas = document.getElementById('particles');
@@ -712,43 +711,101 @@ function initParticles() {
             }
         });
 
-        requestAnimationFrame(animate)
+        requestAnimationFrame(animate);
     }
 
     animate();
 
     window.addEventListener('resize', () => {
         canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight
+        canvas.height = window.innerHeight;
+    })
+}
+
+function switchLanguage(lang) {
+    currentLang = lang;
+
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
     });
+
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+
+        if (translations[lang] && translations[lang][key])
+            el.textContent = translations[lang][key];
+    });
+}
+
+function openModal(moduleKey) {
+    const modal = document.getElementById('moduleModal');
+    const modalBody = document.getElementById('modalBody');
+
+    const module = moduleDetails[moduleKey];
+    const t = translations[currentLang];
+
+    if (!module) return;
+
+    const title = module.title;
+    const description = module.description[currentLang];
+    const features = module.features[currentLang];
+
+    modalBody.innerHTML = `
+        <h2>${title}</h2>
+        <p class='module-description'>${description}</p>
+        <h3>${t.keyFeatures}</h3>
+        <ul class='feature-list'>
+            ${features.map(f => `<li>${f}</li>`).join('')}
+        </ul>
+    `;
+
+    modal.classList.add('active');
+
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    const modal = document.getElementById('moduleModal');
+    modal.classList.remove('active');
+
+    document.body.style.overflow = '';
 }
 
 async function generateHmacSha256(key, message) {
     const encoder = new TextEncoder();
     const keyData = encoder.encode(key);
-    const messageData = encoder.encode(message);
+    const msgData = encoder.encode(message);
 
-    const cryptoKey = await crypto.subtle.importKey(
-        'raw',
-        keyData,
-        { name: 'HMAC', hash: 'SHA-256' },
-        false,
+    const cryptoKey = await window.crypto.subtle.importKey(
+        'raw', 
+        keyData, 
+        { name: 'HMAC', hash: 'SHA-256' }, 
+        false, 
         ['sign']
     );
 
-    const signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData);
-    const hashArray = Array.from(new Uint8Array(signature));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    const signature = await window.crypto.subtle.sign(
+        'HMAC', 
+        cryptoKey, 
+        msgData
+    );
 
-    return hashHex;
+    return Array.from(new Uint8Array(signature))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
 }
 
 function getBrowserSystemInfo() {
     return {
         platform: navigator.platform,
-        userAgent: navigator.userAgent,
-        language: navigator.language,
-        timestamp: new Date().toISOString()
+        platform_release: 'Web Browser',
+        platform_version: navigator.userAgent,
+        hostname: window.location.hostname,
+        local_ip: '127.0.0.1',
+        mac_address: '00:00:00:00:00:00',
+        python_version: 'N/A (JS Client)',
+        process_name: 'Mentalist Web',
+        collected_at: new Date().toISOString()
     };
 }
 
@@ -757,7 +814,7 @@ async function verifyKey() {
     const resultDiv = document.getElementById('verifyResult');
     const t = translations[currentLang];
 
-    const SERVER_URL = window.location.origin;
+    const SERVER_URL = 'https://mentalist.ydns.eu'; 
 
     resultDiv.classList.add('hidden');
     resultDiv.className = 'verify-result';
@@ -774,23 +831,76 @@ async function verifyKey() {
     resultDiv.classList.remove('hidden');
 
     try {
-        const verifyRes = await fetch(`${SERVER_URL}/api/verify`, {
+        const challengeRes = await fetch(`${SERVER_URL}/auth/challenge`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ api_key: apiKey })
+        });
+
+        if (!challengeRes.ok) {
+            let errorMsg = `HTTP Error ${challengeRes.status}`;
+
+            try {
+                const errData = await challengeRes.json();
+
+                if (errData.error) errorMsg = errData.error;
+            } catch (e) {}
+
+            throw new Error(errorMsg);
+        }
+
+        const challengeData = await challengeRes.json();
+        const challenge = challengeData.challenge;
+
+        if (!challenge) throw new Error('Server did not provide challenge');
+
+        const hmacResponse = await generateHmacSha256(apiKey, challenge);
+        const systemInfo = getBrowserSystemInfo();
+
+        const verifyRes = await fetch(`${SERVER_URL}/auth/verify`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                api_key: apiKey
+                api_key: apiKey,
+                response: hmacResponse,
+                system_info: systemInfo
             })
         });
 
-        if (!verifyRes.ok) throw new Error(`HTTP Error ${verifyRes.status}`);
+        if (!verifyRes.ok) {
+            let errorMsg = `Verification Error ${verifyRes.status}`;
+
+            try {
+                const errData = await verifyRes.json();
+
+                if (errData.error) errorMsg = errData.error;
+            } catch (e) {}
+
+            throw new Error(errorMsg);
+        }
 
         const data = await verifyRes.json();
 
-        if (!data.valid) throw new Error(data.error || 'Invalid API key');
+        if (!data.success) throw new Error('Verification failed (Server sent success: false)');
 
-        const modulesList = data.modules || [];
+        const moduleNames = {
+            1: 'TRACKER',
+            2: 'STALKER',
+            4: 'BOOSTER',
+            8: 'SPINNER',
+            16: 'MASTERMIND'
+        };
+        
+        const hasAccess = (perm, flag) => (perm & flag) !== 0;
+
+        const modules = Object.entries(moduleNames).map(([flag, name]) => ({
+            name: name,
+            granted: hasAccess(data.permissions, parseInt(flag))
+        }));
 
         resultDiv.innerHTML = `
             <div class='result-header'>${t.verificationSuccessful}</div>
@@ -806,15 +916,17 @@ async function verifyKey() {
             </div>
             <div class='module-access'>
                 <div class='module-access-title'>${t.moduleAccess}</div>
-                ${modulesList.map(module => `
+                ${modules.map(m => `
                     <div class='access-item'>
-                        <span class='access-icon granted'>✓</span>
-                        <span>${module}</span>
+                        <span class='access-icon ${m.granted ? 'granted' : 'denied'}'>
+                            ${m.granted ? '✓' : '✗'}
+                        </span>
+                        <span>${m.name}</span>
                     </div>
                 `).join('')}
             </div>`;
     } catch (error) {
-        console.error('Verification Error:', error);
+        console.error('Full Error Details:', error);
 
         resultDiv.className = 'verify-result error';
         resultDiv.innerHTML = `
@@ -827,7 +939,7 @@ async function verifyKey() {
 
 async function downloadFile(type) {
     const t = translations[currentLang];
-    const SERVER_URL = window.location.origin;
+    const SERVER_URL = 'https://mentalist.ydns.eu';
     
     const messages = {
         cli: t.downloadingCli,
@@ -875,7 +987,7 @@ async function downloadFile(type) {
 }
 
 async function loadVersionInfo() {
-    const SERVER_URL = window.location.origin;
+    const SERVER_URL = 'https://mentalist.ydns.eu'
     const t = translations[currentLang];
 
     try {
@@ -895,6 +1007,7 @@ async function loadVersionInfo() {
                 const cliSize = formatBytes(data.all_builds.cli.latest.size);
                 
                 if (cliVersionEl) cliVersionEl.textContent = `${t.version.split(':')[0]}: ${cliVersion}`;
+                
                 if (cliSizeEl) cliSizeEl.textContent = `Size: ${cliSize}`;
 
                 if (cliBtn) {
@@ -905,6 +1018,7 @@ async function loadVersionInfo() {
                 }
             } else {
                 if (cliVersionEl) cliVersionEl.textContent = t.versionTbd || 'Version: ---';
+                
                 if (cliSizeEl) cliSizeEl.textContent = 'Size: ---';
                 
                 if (cliBtn) {
@@ -924,6 +1038,7 @@ async function loadVersionInfo() {
                 const guiSize = formatBytes(data.all_builds.gui.latest.size);
                 
                 if (guiVersionEl) guiVersionEl.textContent = `${t.version.split(':')[0]}: ${guiVersion}`;
+                
                 if (guiSizeEl) guiSizeEl.textContent = `Size: ${guiSize}`;
 
                 if (guiBtn) {
@@ -954,6 +1069,7 @@ async function loadVersionInfo() {
                 const mobileSize = formatBytes(data.all_builds.mobile.latest.size);
                 
                 if (mobileVersionEl) mobileVersionEl.textContent = `${t.version.split(':')[0]}: ${mobileVersion}`;
+                
                 if (mobileSizeEl) mobileSizeEl.textContent = `Size: ${mobileSize}`;
  
                 if (mobileBtn) {
@@ -990,6 +1106,79 @@ function formatBytes(bytes, decimals = 2) {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
 
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
+let currentStep = 1;
+const totalSteps = 5;
+
+function nextStep() {
+    if (currentStep < totalSteps) {
+        currentStep++;
+
+        updateWizard();
+    }
+}
+
+function previousStep() {
+    if (currentStep > 1) {
+        currentStep--;
+
+        updateWizard();
+    }
+}
+
+function updateWizard() {
+    document.querySelectorAll('.wizard-nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+
+        if (parseInt(btn.dataset.step) === currentStep) btn.classList.add('active');
+    });
+
+    document.querySelectorAll('.wizard-step').forEach(step => {
+        step.classList.remove('active');
+
+        if (parseInt(step.dataset.step) === currentStep) step.classList.add('active');
+    });
+
+    const prevBtn = document.querySelector('.wizard-btn.prev');
+    const nextBtn = document.querySelector('.wizard-btn.next');
+
+    if (prevBtn) prevBtn.disabled = currentStep === 1;
+
+    if (nextBtn) {
+        if (currentStep === totalSteps) nextBtn.style.display = 'none';
+        
+        else {
+            nextBtn.style.display = 'block';
+            nextBtn.disabled = false;
+        }
+    }
+}
+
+function copyConfig() {
+    const config = document.getElementById('configTemplate');
+
+    if (!config) return;
+
+    const text = config.textContent;
+
+    navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector('.copy-btn');
+
+        if (btn) {
+            const originalText = btn.textContent;
+
+            btn.textContent = currentLang === 'ru' ? 'Скопировано!' : currentLang === 'tr' ? 'Kopyalandı!' : 'Copied!';
+            btn.style.background = 'var(--state-success)';
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = '';
+            }, 2000);
+        }
+    }).catch(err => {
+        console.error('Failed to copy:', err);
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1039,4 +1228,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     loadVersionInfo();
+
+    document.querySelectorAll('.wizard-nav-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            currentStep = parseInt(this.dataset.step);
+            
+            updateWizard();
+        });
+    });
+
+    if (document.querySelector('.wizard-content')) updateWizard();
 });
