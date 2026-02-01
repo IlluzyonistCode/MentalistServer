@@ -1,2 +1,2 @@
-# MentalistServer
+# Mentalist Server
 
