@@ -602,7 +602,7 @@ def index():
     with open(index_path, 'r', encoding='utf-8') as f:
         return f.read()
 
-@app.route('/<path:filename>')
+@app.route('/static/<path:filename>')
 def serve_static(filename):
     file_path = STATIC_DIR / filename
 
@@ -850,11 +850,8 @@ def sync_role_profiles():
 @app.route('/api/update/check', methods=['GET'])
 def check_for_update():
     try:
-        current_version = request.args.get('current_version')
+        current_version = request.args.get('current_version', '0.0.0')
         build_type = request.args.get('build_type', 'cli').lower()
-        
-        if not current_version:
-            return jsonify({'error': 'Current version required'}), 400
         
         if build_type not in BUILD_TYPES:
             return jsonify({'error': f'Invalid build_type. Must be one of: {", ".join(BUILD_TYPES)}'}), 400

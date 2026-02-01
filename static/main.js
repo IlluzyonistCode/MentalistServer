@@ -940,16 +940,8 @@ async function verifyKey() {
 async function downloadFile(type) {
     const t = translations[currentLang];
     const SERVER_URL = 'https://mentalist.ydns.eu';
-    
-    const messages = {
-        cli: t.downloadingCli,
-        gui: t.downloadingGui,
-        mobile: t.downloadingMobile
-    };
 
     try {
-        alert(messages[type]);
-
         const response = await fetch(`${SERVER_URL}/api/update/check?build_type=${type}`);
         
         if (!response.ok) throw new Error(`Server error: ${response.status}`);
@@ -962,7 +954,7 @@ async function downloadFile(type) {
             return;
         }
 
-        const version = data.latest_version || data.current_version;
+        const version = data.latest_version.version;
 
         if (!version) {
             alert(t.noVersionAvailable);
@@ -970,7 +962,7 @@ async function downloadFile(type) {
             return;
         }
 
-        const downloadUrl = `${SERVER_URL}/api/update/download/${version}?build_type=${type}`;
+        const downloadUrl = `${SERVER_URL}/api/update/download?version=${version}&build_type=${type}`;
 
         const link = document.createElement('a');
         link.href = downloadUrl;
@@ -1003,9 +995,9 @@ async function loadVersionInfo() {
             const cliBtn = document.querySelector('.download-card[data-type="cli"] .download-btn');
             
             if (data.all_builds.cli && data.all_builds.cli.latest) {
-                const cliVersion = data.all_builds.cli.latest.version;
-                const cliSize = formatBytes(data.all_builds.cli.latest.size);
-                
+                const cliVersion = data.all_builds.cli.latest;
+                const cliSize = formatBytes(data.all_builds.cli.versions[data.all_builds.cli.versions.length - 1].size);
+
                 if (cliVersionEl) cliVersionEl.textContent = `${t.version.split(':')[0]}: ${cliVersion}`;
                 
                 if (cliSizeEl) cliSizeEl.textContent = `Size: ${cliSize}`;
@@ -1034,8 +1026,8 @@ async function loadVersionInfo() {
             const guiBtn = document.querySelector('.download-card[data-type="gui"] .download-btn');
             
             if (data.all_builds.gui && data.all_builds.gui.latest) {
-                const guiVersion = data.all_builds.gui.latest.version;
-                const guiSize = formatBytes(data.all_builds.gui.latest.size);
+                const guiVersion = data.all_builds.gui.latest;
+                const guiSize = formatBytes(data.all_builds.gui.versions[data.all_builds.gui.versions.length - 1].size);
                 
                 if (guiVersionEl) guiVersionEl.textContent = `${t.version.split(':')[0]}: ${guiVersion}`;
                 
@@ -1066,7 +1058,7 @@ async function loadVersionInfo() {
             
             if (data.all_builds.mobile && data.all_builds.mobile.latest) {
                 const mobileVersion = data.all_builds.mobile.latest.version;
-                const mobileSize = formatBytes(data.all_builds.mobile.latest.size);
+                const mobileSize = formatBytes(data.all_builds.mobile.versions[data.all_builds.mobile.versions.length - 1].size);
                 
                 if (mobileVersionEl) mobileVersionEl.textContent = `${t.version.split(':')[0]}: ${mobileVersion}`;
                 
@@ -1232,7 +1224,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.wizard-nav-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             currentStep = parseInt(this.dataset.step);
-            
+
             updateWizard();
         });
     });
