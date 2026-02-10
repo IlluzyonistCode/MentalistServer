@@ -146,8 +146,8 @@ const translations = {
         contactInstagram: 'Instagram: @killer.wov',
         contactDiscord: 'Discord: @the_prometh3us',
         contactUs: 'Contact Us',
-        instagramDesc: 'Follow us for updates, news, and announcements',
-        discordDesc: 'Join our community for support and discussions',
+        instagramDesc: 'Direct contact and project updates',
+        discordDesc: 'Technical support and inquiries',
         email: 'Email',
         emailDesc: 'Contact us directly for business inquiries',
         product: 'Product',
@@ -312,8 +312,8 @@ const translations = {
         contactInstagram: 'Instagram: @killer.wov',
         contactDiscord: 'Discord: @the_prometh3us',
         contactUs: 'Bize Ulaşın',
-        instagramDesc: 'Güncellemeler, haberler ve duyurular için bizi takip edin',
-        discordDesc: 'Destek ve tartışmalar için topluluğumuza katılın',
+        instagramDesc: 'Doğrudan iletişim ve proje güncellemeleri',
+        discordDesc: 'Teknik destek ve sorular',
         email: 'E-posta',
         emailDesc: 'İş soruşturmaları için doğrudan bize ulaşın',
         product: 'Ürün',
@@ -478,8 +478,8 @@ const translations = {
         contactInstagram: 'Instagram: @killer.wov',
         contactDiscord: 'Discord: @the_prometh3us',
         contactUs: 'Свяжитесь с нами',
-        instagramDesc: 'Подписывайтесь на обновления, новости и объявления',
-        discordDesc: 'Присоединяйтесь к нашему сообществу для поддержки и обсуждений',
+        instagramDesc: 'Прямой контакт и обновления проекта',
+        discordDesc: 'Техническая поддержка и вопросы',
         email: 'Email',
         emailDesc: 'Свяжитесь с нами напрямую по деловым вопросам',
         product: 'Продукт',
@@ -725,15 +725,50 @@ function initParticles() {
 function switchLanguage(lang) {
     currentLang = lang;
 
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.lang === lang);
+    const cliVersionEl = document.querySelector('.download-card[data-type="cli"] .version-text');
+    const cliSizeEl = document.querySelector('.download-card[data-type="cli"] .size-text');
+    const guiVersionEl = document.querySelector('.download-card[data-type="gui"] .version-text');
+    const guiSizeEl = document.querySelector('.download-card[data-type="gui"] .size-text');
+    const mobileVersionEl = document.querySelector('.download-card[data-type="mobile"] .version-text');
+    const mobileSizeEl = document.querySelector('.download-card[data-type="mobile"] .size-text');
+    
+    const savedVersions = {
+        cli: cliVersionEl ? cliVersionEl.textContent : null,
+        cliSize: cliSizeEl ? cliSizeEl.textContent : null,
+        gui: guiVersionEl ? guiVersionEl.textContent : null,
+        guiSize: guiSizeEl ? guiSizeEl.textContent : null,
+        mobile: mobileVersionEl ? mobileVersionEl.textContent : null,
+        mobileSize: mobileSizeEl ? mobileSizeEl.textContent : null
+    };
+
+    document.querySelectorAll('[data-i18n]').forEach(elem => {
+        const key = elem.getAttribute('data-i18n');
+
+        if (translations[lang] && translations[lang][key]) elem.textContent = translations[lang][key];
     });
 
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
+    if (savedVersions.cli && cliVersionEl && !savedVersions.cli.includes('---'))
+        cliVersionEl.textContent = savedVersions.cli;
 
-        if (translations[lang] && translations[lang][key])
-            el.textContent = translations[lang][key];
+    if (savedVersions.cliSize && cliSizeEl && !savedVersions.cliSize.includes('---'))
+        cliSizeEl.textContent = savedVersions.cliSize;
+
+    if (savedVersions.gui && guiVersionEl && !savedVersions.gui.includes('---'))
+        guiVersionEl.textContent = savedVersions.gui;
+
+    if (savedVersions.guiSize && guiSizeEl && !savedVersions.guiSize.includes('---'))
+        guiSizeEl.textContent = savedVersions.guiSize;
+
+    if (savedVersions.mobile && mobileVersionEl && !savedVersions.mobile.includes('---'))
+        mobileVersionEl.textContent = savedVersions.mobile;
+
+    if (savedVersions.mobileSize && mobileSizeEl && !savedVersions.mobileSize.includes('---'))
+        mobileSizeEl.textContent = savedVersions.mobileSize;
+
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.remove('active');
+
+        if (btn.dataset.lang === lang) btn.classList.add('active');
     });
 }
 
@@ -814,7 +849,7 @@ async function verifyKey() {
     const resultDiv = document.getElementById('verifyResult');
     const t = translations[currentLang];
 
-    const SERVER_URL = 'https://mentalist.ydns.eu'; 
+    const SERVER_URL = 'https://mentalist.corruptor.pro'; 
 
     resultDiv.classList.add('hidden');
     resultDiv.className = 'verify-result';
@@ -939,7 +974,7 @@ async function verifyKey() {
 
 async function downloadFile(type) {
     const t = translations[currentLang];
-    const SERVER_URL = 'https://mentalist.ydns.eu';
+    const SERVER_URL = 'https://mentalist.corruptor.pro';
 
     try {
         const response = await fetch(`${SERVER_URL}/api/update/check?build_type=${type}`);
@@ -979,7 +1014,7 @@ async function downloadFile(type) {
 }
 
 async function loadVersionInfo() {
-    const SERVER_URL = 'https://mentalist.ydns.eu'
+    const SERVER_URL = 'https://mentalist.corruptor.pro'
     const t = translations[currentLang];
 
     try {

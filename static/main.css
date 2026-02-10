@@ -93,12 +93,6 @@ body::before {
     box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 
-.contact-icon {
-    width: 24px;
-    height: 24px;
-    flex-shrink: 0;
-}
-
 .contact-card-icon svg {
     filter: drop-shadow(0 0 15px var(--tal-gold));
     transition: var(--transition);
@@ -107,10 +101,6 @@ body::before {
 .contact-card:hover .contact-card-icon svg {
     filter: drop-shadow(0 0 25px var(--tal-gold));
     transform: scale(1.1);
-}
-
-.get-key-icon svg {
-    filter: drop-shadow(0 0 20px var(--tal-gold));
 }
 
 .logo:hover {
@@ -200,11 +190,6 @@ body::before {
     color: var(--text-bright)
 }
 
-.flag-icon {
-    font-size: 1.2rem;
-    line-height: 1
-}
-
 .hero-section {
     min-height: 100vh;
     display: flex;
@@ -289,18 +274,6 @@ body::before {
     color: var(--text-ash);
     margin-bottom: 3rem;
     animation: fadeInUp .8s ease-out .5s backwards
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px)
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0)
-    }
 }
 
 .hero-features {
@@ -1334,6 +1307,18 @@ body::before {
 .contact-card-link:hover {
     background: var(--blood-arterial);
     color: var(--text-bright)
+}
+
+.contact-card-link-disabled {
+    display: inline-block;
+    color: var(--tal-gold);
+    text-decoration: none;
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    transition: var(--transition);
+    cursor: default;
+    opacity: 0.7;
 }
 
 .main-footer {
