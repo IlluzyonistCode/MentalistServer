@@ -108,6 +108,7 @@ def init_database():
             status INTEGER DEFAULT 1,
             permissions INTEGER DEFAULT 0,
             bearer_token TEXT,
+            refresh_token TEXT,
             tracker_api_keys TEXT,
             stalker_api_keys TEXT,
             last_connection TIMESTAMP,
@@ -377,31 +378,47 @@ def update_user_session(user_id, ip_address, system_info):
         'system_info': json.dumps(system_info)
     })
 
-def update_user_tokens(user_id, bearer_token=None, tracker_keys=None, stalker_keys=None):
+def update_user_tokens(user_id, bearer_token=None, refresh_token=None, tracker_keys=None, stalker_keys=None):
     conn = get_db_connection()
     cursor = conn.cursor()
-    
+
     updates = []
     params = []
-    
+
     if bearer_token:
         updates.append('bearer_token = ?')
         params.append(bearer_token)
-    
+
+    if refresh_token:
+        updates.append('refresh_token = ?')
+        params.append(refresh_token)
+
     if tracker_keys:
         updates.append('tracker_api_keys = ?')
         params.append(','.join(tracker_keys) if isinstance(tracker_keys, list) else tracker_keys)
-    
+
     if stalker_keys:
         updates.append('stalker_api_keys = ?')
         params.append(','.join(stalker_keys) if isinstance(stalker_keys, list) else stalker_keys)
-    
+
     if updates:
         params.append(user_id)
         query = f'UPDATE users SET {", ".join(updates)} WHERE id = ?'
         cursor.execute(query, params)
         conn.commit()
+
+    conn.close()
+
+def update_last_connection(user_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
     
+    cursor.execute(
+        'UPDATE users SET last_connection = CURRENT_TIMESTAMP WHERE id = ?',
+        (user_id,)
+    )
+    
+    conn.commit()
     conn.close()
 
 def disable_user(api_key):
@@ -471,6 +488,7 @@ def require_auth(module=None):
                 
                 user_id = result
                 log_request(user_id, request.remote_addr, module, request.endpoint)
+
             else:
                 conn = get_db_connection()
                 cursor = conn.cursor()
@@ -482,6 +500,8 @@ def require_auth(module=None):
                     return jsonify({'error': 'Invalid or disabled API key'}), 401
                 
                 user_id = result[0]
+
+            update_last_connection(user_id)
             
             request.user_id = user_id
             
@@ -691,14 +711,15 @@ def auth_verify():
 @require_auth()
 def update_tokens():
     data = request.json
-    
+
     update_user_tokens(
         request.user_id,
         bearer_token=data.get('bearer_token'),
+        refresh_token=data.get('refresh_token'),
         tracker_keys=data.get('tracker_api_keys'),
         stalker_keys=data.get('stalker_api_keys')
     )
-    
+
     return jsonify({'success': True})
 
 @app.route('/health', methods=['GET'])
@@ -1058,7 +1079,7 @@ def admin_list_users():
         cursor = conn.cursor()
         
         cursor.execute('''
-            SELECT u.id, u.api_key, u.status, u.permissions, u.bearer_token,
+            SELECT u.id, u.api_key, u.status, u.permissions, u.bearer_token, u.refresh_token,
                    u.tracker_api_keys, u.stalker_api_keys, u.last_connection, u.created_at,
                    COALESCE(m.tracker_requests, 0) as tracker_requests,
                    COALESCE(m.stalker_requests, 0) as stalker_requests,
@@ -1079,16 +1100,17 @@ def admin_list_users():
                 'status': row[2],
                 'permissions': row[3],
                 'bearer_token': row[4],
-                'tracker_api_keys': row[5],
-                'stalker_api_keys': row[6],
-                'last_connection': row[7],
-                'created_at': row[8],
+                'refresh_token': row[5],
+                'tracker_api_keys': row[6],
+                'stalker_api_keys': row[7],
+                'last_connection': row[8],
+                'created_at': row[9],
                 'usage': {
-                    'tracker': row[9],
-                    'stalker': row[10],
-                    'booster': row[11],
-                    'spinner': row[12],
-                    'mastermind': row[13]
+                    'tracker': row[10],
+                    'stalker': row[11],
+                    'booster': row[12],
+                    'spinner': row[13],
+                    'mastermind': row[14]
                 }
             })
         
