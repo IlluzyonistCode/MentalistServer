@@ -22,6 +22,7 @@
             <a href="#intro" class="nav-link" data-i18n="about">About</a>
             <a href="#modules" class="nav-link" data-i18n="modules">Modules</a>
             <a href="#features" class="nav-link" data-i18n="features">Features</a>
+            <a href="#demo" class="nav-link" data-i18n="demo">Demo</a>
             <a href="#download" class="nav-link" data-i18n="download">Download</a>
             <a href="#installation" class="nav-link" data-i18n="installation">Installation</a>
             <a href="#verify" class="nav-link" data-i18n="verifyKey">Verify Key</a>
@@ -206,6 +207,23 @@
             </div>
         </div>
     </section>
+    <section id="demo" class="demo-section">
+        <div class="container">
+            <h2 class="section-title" data-i18n="demoTitle">See It In Action</h2>
+            <p class="section-subtitle" data-i18n="demoSubtitle">Watch Mentalist modules working in real scenarios</p>
+            <div class="demo-slider">
+                <div class="slider-track-wrapper">
+                    <div class="slider-track" id="sliderTrack"></div>
+                    <button class="slider-arrow slider-arrow-prev" onclick="sliderPrev()" aria-label="Previous">&#8249;</button>
+                    <button class="slider-arrow slider-arrow-next" onclick="sliderNext()" aria-label="Next">&#8250;</button>
+                </div>
+                <div class="slider-progress-bar">
+                    <div class="slider-progress-fill" id="sliderProgress"></div>
+                </div>
+                <div class="slider-dots" id="sliderDots"></div>
+            </div>
+        </div>
+    </section>
     <section id="download" class="download-section">
         <div class="container">
             <h2 class="section-title" data-i18n="downloadMentalist">Download Mentalist</h2>
@@ -331,6 +349,7 @@
 STALKER_API_KEYS=YOUR_WOLVESVILLE_API_KEY
 CHROME_EXECUTABLE=C:\Program Files\Google\Chrome\Application\chrome.exe
 CHROME_VIEWPORT=958,958
+CHROME_PROFILE=1
 BLUESTACKS5_EXECUTABLE=C:\Program Files\BlueStacks_nxt\HD-Player.exe
 BLUESTACKS5_NAME=Player
 SERVER_SYNC_ENABLED=true
@@ -373,6 +392,13 @@ MENTALIST_SERVER_API_KEY=YOUR_MENTALIST_API_KEY</pre>
                                     <span class="param-optional" data-i18n="optional">Optional</span>
                                 </div>
                                 <p data-i18n="chromeViewportDesc">Browser window size. You can keep default <code>958,958</code> or get your viewport from <a href="https://whatismyviewport.com/" target="_blank">whatismyviewport.com</a> and enter as <code>width,height</code></p>
+                            </div>
+                            <div class="param-group">
+                                <div class="param-header">
+                                    <h4>CHROME_PROFILE</h4>
+                                    <span class="param-optional" data-i18n="optional">Optional</span>
+                                </div>
+                                <p data-i18n="chromeProfileDesc">Browser profile number (1–10). Use different profiles to run multiple instances simultaneously without conflicts. Default: 1</p>
                             </div>
                             <div class="param-group">
                                 <div class="param-header">
@@ -514,7 +540,6 @@ MENTALIST_SERVER_API_KEY=YOUR_MENTALIST_API_KEY</pre>
                 </div>
                 <div class="footer-bottom">
                     <p data-i18n="footerMade">Made with ❤️ by Corruptor</p>
-                    <p class="version">Version 1.0.0</p>
                 </div>
             </div>
         </div>

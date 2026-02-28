@@ -1,8 +1,15 @@
+const versionData = {
+    cli: { version: null, size: null },
+    gui: { version: null, size: null },
+    mobile: { version: null, size: null }
+};
+
 const translations = {
     en: {
         about: 'About',
         modules: 'Modules',
         features: 'Features',
+        demo: 'Demo',
         download: 'Download',
         verifyKey: 'Verify Key',
         installation: 'Installation',
@@ -84,6 +91,8 @@ const translations = {
         sizeCli: 'Size: ---',
         sizeGui: 'Size: ---',
         sizeMobile: 'Size: TBD',
+        versionLabel: 'Version',
+        sizeLabel: 'Size',
         systemRequirements: 'System Requirements',
         os: 'OS:',
         osValue: 'Windows 10+, Linux, macOS',
@@ -121,6 +130,7 @@ const translations = {
         optional: 'Optional',
         chromeExecDesc: 'Path to your Chrome browser executable. Leave default if Chrome is installed in the standard location.',
         chromeViewportDesc: 'Browser window size. You can keep default 958,958 or get your viewport from whatismyviewport.com and enter as width,height',
+        chromeProfileDesc: 'Browser profile number (1–10). Use different profiles to run multiple instances simultaneously without conflicts. Default: 1',
         requiredFor: 'Required for Spinner',
         bluestacksDesc: 'Path to BlueStacks 5 executable and window name. Only needed if you want to use the Spinner module.',
         serverSyncDesc: 'Enable cloud synchronization. Set to true to sync data across devices or false to keep data local.',
@@ -163,12 +173,15 @@ const translations = {
         permissionLevel: 'Permission Level',
         moduleAccess: 'Module Access',
         errorEnterKey: 'Please enter an API key',
-        errorInvalidKey: 'Invalid API key or server error. Please check your key and try again.'
+        errorInvalidKey: 'Invalid API key or server error. Please check your key and try again.',
+        demoTitle: 'See It In Action',
+        demoSubtitle: 'Watch Mentalist modules working in real scenarios'
     },
     tr: {
         about: 'Hakkında',
         modules: 'Modüller',
         features: 'Özellikler',
+        demo: 'Demo',
         download: 'İndir',
         verifyKey: 'Anahtar Doğrula',
         installation: 'Kurulum',
@@ -250,6 +263,8 @@ const translations = {
         sizeCli: 'Boyut: ---',
         sizeGui: 'Boyut: ---',
         sizeMobile: 'Boyut: Belirlenecek',
+        versionLabel: 'Versiyon',
+        sizeLabel: 'Boyut',
         systemRequirements: 'Sistem Gereksinimleri',
         os: 'İS:',
         osValue: 'Windows 10+, Linux, macOS',
@@ -287,6 +302,7 @@ const translations = {
         optional: 'İsteğe bağlı',
         chromeExecDesc: 'Chrome tarayıcınızın çalıştırılabilir dosyasının yolu. Chrome standart konuma kuruluysa varsayılan olarak bırakın.',
         chromeViewportDesc: 'Tarayıcı penceresi boyutu. Varsayılan 958,958\'i tutabilir veya whatismyviewport.com\'dan görünüm alanınızı alıp genişlik,yükseklik olarak girebilirsiniz',
+        chromeProfileDesc: 'Tarayıcı profil numarası (1–10). Çakışmalar olmadan aynı anda birden fazla örnek çalıştırmak için farklı profiller kullanın. Varsayılan: 1',
         requiredFor: 'Spinner için gerekli',
         bluestacksDesc: 'BlueStacks 5 çalıştırılabilir dosyasının yolu ve pencere adı. Sadece Spinner modülünü kullanmak istiyorsanız gereklidir.',
         serverSyncDesc: 'Bulut senkronizasyonunu etkinleştirin. Cihazlar arası veri senkronizasyonu için true veya verileri yerel tutmak için false olarak ayarlayın.',
@@ -329,12 +345,15 @@ const translations = {
         permissionLevel: 'İzin Seviyesi',
         moduleAccess: 'Modül Erişimi',
         errorEnterKey: 'Lütfen bir API anahtarı girin',
-        errorInvalidKey: 'Geçersiz API anahtarı veya sunucu hatası. Lütfen anahtarınızı kontrol edin ve tekrar deneyin.'
+        errorInvalidKey: 'Geçersiz API anahtarı veya sunucu hatası. Lütfen anahtarınızı kontrol edin ve tekrar deneyin.',
+        demoTitle: 'Çalışırken Görün',
+        demoSubtitle: 'Mentalist modüllerinin gerçek senaryolarda nasıl çalıştığını izleyin'
     },
     ru: {
         about: 'О программе',
         modules: 'Модули',
         features: 'Возможности',
+        demo: 'Демо',
         download: 'Скачать',
         verifyKey: 'Проверить ключ',
         installation: 'Установка',
@@ -416,6 +435,8 @@ const translations = {
         sizeCli: 'Размер: ---',
         sizeGui: 'Размер: ---',
         sizeMobile: 'Размер: ---',
+        versionLabel: 'Версия',
+        sizeLabel: 'Размер',
         systemRequirements: 'Системные требования',
         os: 'ОС:',
         osValue: 'Windows 10+, Linux, macOS',
@@ -453,6 +474,7 @@ const translations = {
         optional: 'Необязательно',
         chromeExecDesc: 'Путь к исполняемому файлу вашего браузера Chrome. Оставьте по умолчанию, если Chrome установлен в стандартном месте.',
         chromeViewportDesc: 'Размер окна браузера. Можно оставить по умолчанию 958,958 или получить ваш viewport с сайта whatismyviewport.com и ввести как ширина,высота',
+        chromeProfileDesc: 'Номер профиля браузера (1–10). Используйте разные профили для одновременного запуска нескольких экземпляров без конфликтов. По умолчанию: 1',
         requiredFor: 'Требуется для Spinner',
         bluestacksDesc: 'Путь к исполняемому файлу BlueStacks 5 и имя окна. Требуется только если вы хотите использовать модуль Spinner.',
         serverSyncDesc: 'Включить облачную синхронизацию. Установите true для синхронизации данных между устройствами или false для хранения данных локально.',
@@ -495,7 +517,9 @@ const translations = {
         permissionLevel: 'Уровень разрешений',
         moduleAccess: 'Доступ к модулям',
         errorEnterKey: 'Пожалуйста, введите API ключ',
-        errorInvalidKey: 'Неверный API ключ или ошибка сервера. Проверьте ключ и попробуйте снова.'
+        errorInvalidKey: 'Неверный API ключ или ошибка сервера. Проверьте ключ и попробуйте снова.',
+        demoTitle: 'Смотрите в действии',
+        demoSubtitle: 'Наблюдайте за работой модулей Mentalist в реальных сценариях'
     }
 };
 
@@ -725,51 +749,37 @@ function initParticles() {
 function switchLanguage(lang) {
     currentLang = lang;
 
-    const cliVersionEl = document.querySelector('.download-card[data-type="cli"] .version-text');
-    const cliSizeEl = document.querySelector('.download-card[data-type="cli"] .size-text');
-    const guiVersionEl = document.querySelector('.download-card[data-type="gui"] .version-text');
-    const guiSizeEl = document.querySelector('.download-card[data-type="gui"] .size-text');
-    const mobileVersionEl = document.querySelector('.download-card[data-type="mobile"] .version-text');
-    const mobileSizeEl = document.querySelector('.download-card[data-type="mobile"] .size-text');
-    
-    const savedVersions = {
-        cli: cliVersionEl ? cliVersionEl.textContent : null,
-        cliSize: cliSizeEl ? cliSizeEl.textContent : null,
-        gui: guiVersionEl ? guiVersionEl.textContent : null,
-        guiSize: guiSizeEl ? guiSizeEl.textContent : null,
-        mobile: mobileVersionEl ? mobileVersionEl.textContent : null,
-        mobileSize: mobileSizeEl ? mobileSizeEl.textContent : null
-    };
+    const t = translations[lang];
 
     document.querySelectorAll('[data-i18n]').forEach(elem => {
         const key = elem.getAttribute('data-i18n');
 
-        if (translations[lang] && translations[lang][key]) elem.textContent = translations[lang][key];
+        if (t && t[key]) elem.textContent = t[key];
     });
 
-    if (savedVersions.cli && cliVersionEl && !savedVersions.cli.includes('---'))
-        cliVersionEl.textContent = savedVersions.cli;
+    ['cli', 'gui', 'mobile'].forEach(type => {
+        const versionEl = document.querySelector(`.download-card[data-type="${type}"] .version-text`);
+        const sizeEl = document.querySelector(`.download-card[data-type="${type}"] .size-text`);
+        const d = versionData[type];
 
-    if (savedVersions.cliSize && cliSizeEl && !savedVersions.cliSize.includes('---'))
-        cliSizeEl.textContent = savedVersions.cliSize;
+        if (versionEl)
+            versionEl.textContent = d.version
+                ? `${t.versionLabel}: ${d.version}`
+                : (t[`version${type === 'mobile' ? 'Tbd' : ''}`] || t.version);
 
-    if (savedVersions.gui && guiVersionEl && !savedVersions.gui.includes('---'))
-        guiVersionEl.textContent = savedVersions.gui;
-
-    if (savedVersions.guiSize && guiSizeEl && !savedVersions.guiSize.includes('---'))
-        guiSizeEl.textContent = savedVersions.guiSize;
-
-    if (savedVersions.mobile && mobileVersionEl && !savedVersions.mobile.includes('---'))
-        mobileVersionEl.textContent = savedVersions.mobile;
-
-    if (savedVersions.mobileSize && mobileSizeEl && !savedVersions.mobileSize.includes('---'))
-        mobileSizeEl.textContent = savedVersions.mobileSize;
+        if (sizeEl)
+            sizeEl.textContent = d.size
+                ? `${t.sizeLabel}: ${d.size}`
+                : (t[`size${type.charAt(0).toUpperCase() + type.slice(1)}`] || t.sizeCli);
+    });
 
     document.querySelectorAll('.lang-btn').forEach(btn => {
         btn.classList.remove('active');
 
         if (btn.dataset.lang === lang) btn.classList.add('active');
     });
+
+    updateSlideTexts();
 }
 
 function openModal(moduleKey) {
@@ -1033,9 +1043,12 @@ async function loadVersionInfo() {
                 const cliVersion = data.all_builds.cli.latest;
                 const cliSize = formatBytes(data.all_builds.cli.versions[data.all_builds.cli.versions.length - 1].size);
 
-                if (cliVersionEl) cliVersionEl.textContent = `${t.version.split(':')[0]}: ${cliVersion}`;
+                versionData.cli.version = cliVersion;
+                versionData.cli.size = cliSize;
+
+                if (cliVersionEl) cliVersionEl.textContent = `${t.versionLabel}: ${cliVersion}`;
                 
-                if (cliSizeEl) cliSizeEl.textContent = `Size: ${cliSize}`;
+                if (cliSizeEl) cliSizeEl.textContent = `${t.sizeLabel}: ${cliSize}`;
 
                 if (cliBtn) {
                     cliBtn.textContent = t.downloadCli || 'Download CLI';
@@ -1064,9 +1077,12 @@ async function loadVersionInfo() {
                 const guiVersion = data.all_builds.gui.latest;
                 const guiSize = formatBytes(data.all_builds.gui.versions[data.all_builds.gui.versions.length - 1].size);
                 
-                if (guiVersionEl) guiVersionEl.textContent = `${t.version.split(':')[0]}: ${guiVersion}`;
+                versionData.gui.version = guiVersion;
+                versionData.gui.size = guiSize;
+
+                if (guiVersionEl) guiVersionEl.textContent = `${t.versionLabel}: ${guiVersion}`;
                 
-                if (guiSizeEl) guiSizeEl.textContent = `Size: ${guiSize}`;
+                if (guiSizeEl) guiSizeEl.textContent = `${t.sizeLabel}: ${guiSize}`;
 
                 if (guiBtn) {
                     guiBtn.textContent = t.downloadGui || 'Download GUI';
@@ -1095,9 +1111,12 @@ async function loadVersionInfo() {
                 const mobileVersion = data.all_builds.mobile.latest.version;
                 const mobileSize = formatBytes(data.all_builds.mobile.versions[data.all_builds.mobile.versions.length - 1].size);
                 
-                if (mobileVersionEl) mobileVersionEl.textContent = `${t.version.split(':')[0]}: ${mobileVersion}`;
+                versionData.mobile.version = mobileVersion;
+                versionData.mobile.size = mobileSize;
+
+                if (mobileVersionEl) mobileVersionEl.textContent = `${t.versionLabel}: ${mobileVersion}`;
                 
-                if (mobileSizeEl) mobileSizeEl.textContent = `Size: ${mobileSize}`;
+                if (mobileSizeEl) mobileSizeEl.textContent = `${t.sizeLabel}: ${mobileSize}`;
  
                 if (mobileBtn) {
                     mobileBtn.textContent = 'Download Mobile';
@@ -1208,6 +1227,144 @@ function copyConfig() {
     });
 }
 
+const demoSlides = [
+    {
+        type: 'video',
+        src: 'static/videos/tracker_demo.mp4',
+        title: { en: 'TRACKER in Action', ru: 'TRACKER в действии', tr: 'TRACKER Çalışıyor' },
+        subtitle: { en: 'Monitors Roles, Teams & Chat in Real Time', ru: 'ОСледит за ролями, командами и чатом в реальном времени', tr: 'Rolleri, Takımları ve Sohbeti Gerçek Zamanlı İzler' }
+    },
+    {
+        type: 'video',
+        src: 'static/videos/stalker_demo.mp4',
+        title: { en: 'STALKER in Action', ru: 'STALKER в действии', tr: 'STALKER Çalışıyor' },
+        subtitle: { en: 'Tracks Player Patterns & Predicts Online Times', ru: 'Отслеживает паттерны и предсказывает время онлайн', tr: 'Oyuncu Kalıplarını İzler ve Çevrimiçi Zamanı Tahmin Eder' }
+    },
+    {
+        type: 'video',
+        src: 'static/videos/booster_demo.mp4',
+        title: { en: 'BOOSTER in Action', ru: 'BOOSTER в действии', tr: 'BOOSTER Çalışıyor' },
+        subtitle: { en: 'Automates Rooms, Chats & In-Game Abilities', ru: 'Автоматизирует комнаты, чат и игровые способности', tr: 'GOda, Sohbet ve Yetenekleri Otomatikleştirir' }
+    }
+];
+
+let currentSlide = 0;
+let slideTimer = null;
+let slideProgress = null;
+
+function initDemoSlider() {
+    const track = document.getElementById('sliderTrack');
+    const dotsContainer = document.getElementById('sliderDots');
+
+    if (!track) return;
+
+    demoSlides.forEach((slide, i) => {
+        const el = document.createElement('div');
+
+        el.className = 'demo-slide';
+        el.dataset.index = i;
+
+        if (slide.type === 'video')
+            el.innerHTML = `
+                <video class="slide-media" src="${slide.src}" muted loop playsinline preload="metadata"></video>
+                <div class="slide-overlay"></div>
+                <div class="slide-caption">
+                    <h3 class="slide-title" data-slide="${i}"></h3>
+                    <p class="slide-subtitle" data-slide-sub="${i}"></p>
+                </div>`;
+        
+        else
+            el.innerHTML = `
+                <img class="slide-media" src="${slide.src}" alt="">
+                <div class="slide-overlay"></div>
+                <div class="slide-caption">
+                    <h3 class="slide-title" data-slide="${i}"></h3>
+                    <p class="slide-subtitle" data-slide-sub="${i}"></p>
+                </div>`;
+
+        track.appendChild(el);
+
+        const dot = document.createElement('button');
+        dot.className = 'slider-dot' + (i === 0 ? ' active' : '');
+        dot.addEventListener('click', () => goToSlide(i));
+
+        dotsContainer.appendChild(dot);
+    });
+
+    updateSlideTexts();
+    goToSlide(0, true);
+}
+
+function updateSlideTexts() {
+    demoSlides.forEach((slide, i) => {
+        const titleEl = document.querySelector(`[data-slide="${i}"]`);
+        const subEl = document.querySelector(`[data-slide-sub="${i}"]`);
+
+        if (titleEl) titleEl.textContent = slide.title[currentLang] || slide.title.en;
+        
+        if (subEl) subEl.textContent = slide.subtitle[currentLang] || slide.subtitle.en;
+    });
+}
+
+function goToSlide(index, initial = false) {
+    const slides = document.querySelectorAll('.demo-slide');
+    const dots = document.querySelectorAll('.slider-dot');
+
+    if (!slides.length) return;
+
+    slides.forEach((s, i) => {
+        s.classList.toggle('active', i === index);
+
+        const video = s.querySelector('video');
+
+        if (video) {
+            if (i === index) {
+                video.currentTime = 0;
+                video.play().catch(() => {});
+            }
+
+            else video.pause()
+        }
+    });
+
+    dots.forEach((d, i) => d.classList.toggle('active', i === index));
+
+    currentSlide = index;
+
+    resetSlideTimer();
+    animateProgressBar();
+}
+
+function resetSlideTimer() {
+    clearTimeout(slideTimer);
+
+    slideTimer = setTimeout(() => {
+        goToSlide((currentSlide + 1) % demoSlides.length);
+    }, 7000);
+}
+
+function animateProgressBar() {
+    const bar = document.getElementById('sliderProgress');
+
+    if (!bar) return;
+
+    bar.style.transition = 'none';
+    bar.style.width = '0%';
+
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+        bar.style.transition = 'width 7s linear';
+        bar.style.width = '100%';
+    }));
+}
+
+function sliderPrev() {
+    goToSlide((currentSlide - 1 + demoSlides.length) % demoSlides.length);
+}
+
+function sliderNext() {
+    goToSlide((currentSlide + 1) % demoSlides.length);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initParticles();
 
@@ -1255,6 +1412,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     loadVersionInfo();
+    initDemoSlider();
 
     document.querySelectorAll('.wizard-nav-btn').forEach(btn => {
         btn.addEventListener('click', function() {
