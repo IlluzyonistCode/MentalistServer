@@ -4,6 +4,114 @@ const versionData = {
     mobile: { version: null, size: null }
 };
 
+async function collectBrowserFingerprint() {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const languages = navigator.languages || [navigator.language];
+    const fontSet = new Set();
+
+    try {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.font = '12px Arial';
+
+        const testFonts = [
+            'Arial', 'Verdana', 'Times New Roman', 'Courier New',
+            'Georgia', 'Palatino', 'Garamond', 'Bookman',
+            'Comic Sans MS', 'Trebuchet MS', 'Impact', 'Tahoma', 'Lucida Sans'
+        ];
+
+        testFonts.forEach(fontName => {
+            ctx.font = '12px ' + fontName;
+            const width = ctx.measureText('mmmmmmmmmmlli').width;
+            fontSet.add(width);
+        });
+    } catch (error) {
+        console.error('Font fingerprinting failed:', error);
+    }
+
+    const fingerprint = {
+        timezone: timezone,
+        languages: languages,
+        fontCount: fontSet.size,
+        screenWidth: screen.width,
+        screenHeight: screen.height,
+        screenDepth: screen.colorDepth,
+        hardwareConcurrency: navigator.hardwareConcurrency || 0,
+        deviceMemory: navigator.deviceMemory || 0,
+        platform: navigator.platform,
+        userAgent: navigator.userAgent
+    };
+
+    return fingerprint;
+}
+
+async function detectWebRTCLeak() {
+    const rtcConfig = {
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+    };
+
+    try {
+        const peerConnection = new RTCPeerConnection(rtcConfig);
+        let localIP = null;
+        let publicIP = null;
+
+        peerConnection.createDataChannel('');
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+
+        return new Promise((resolve) => {
+            const timeout = setTimeout(() => {
+                peerConnection.close();
+                resolve({ local: null, public: null, leaked: false });
+            }, 3000);
+
+            peerConnection.onicecandidate = (event) => {
+                if (!event || !event.candidate) return;
+
+                const candidate = event.candidate.candidate;
+                const ipRegex = /([0-9]{1,3}\.){3}[0-9]{1,3}/;
+                const match = candidate.match(ipRegex);
+
+                if (match) {
+                    const ip = match[0];
+
+                    if (ip.startsWith('192.168.') || ip.startsWith('10.') || ip.startsWith('172.')) {
+                        if (!localIP) localIP = ip;
+                    } else {
+                        if (!publicIP) publicIP = ip;
+                    }
+                }
+
+                if (localIP && publicIP) {
+                    clearTimeout(timeout);
+                    peerConnection.close();
+                    resolve({ local: localIP, public: publicIP, leaked: true });
+                }
+            };
+        });
+    } catch (error) {
+        console.error('WebRTC detection failed:', error);
+        return { local: null, public: null, leaked: false };
+    }
+}
+
+async function measureRoundTripTime() {
+    const startTime = performance.now();
+
+    try {
+        await fetch('https://www.google.com/favicon.ico', {
+            method: 'HEAD',
+            cache: 'no-cache'
+        });
+    } catch (error) {
+        console.error('RTT measurement failed:', error);
+    }
+
+    const endTime = performance.now();
+
+    return Math.round(endTime - startTime);
+}
+
 const translations = {
     en: {
         about: 'About',
@@ -175,7 +283,17 @@ const translations = {
         errorEnterKey: 'Please enter an API key',
         errorInvalidKey: 'Invalid API key or server error. Please check your key and try again.',
         demoTitle: 'See It In Action',
-        demoSubtitle: 'Watch Mentalist modules working in real scenarios'
+        demoSubtitle: 'Watch Mentalist modules working in real scenarios',
+        downloadTokenTitle: 'Enter Your Token',
+        downloadTokenDesc: 'A valid subscription token is required to download files.',
+        downloadTokenPlaceholder: 'Paste your API token here...',
+        downloadTokenBtn: 'Download',
+        downloadTokenChecking: 'Verifying...',
+        downloadTokenError: 'Invalid token or account disabled.',
+        downloadTokenGeoError: 'Downloads are not available in your region.',
+        downloadTokenNetError: 'Server connection error. Please try again later.',
+        noVersionAvailable: 'No version available yet.',
+        downloadError: 'Download error. Please try again.'
     },
     tr: {
         about: 'Hakkında',
@@ -347,7 +465,17 @@ const translations = {
         errorEnterKey: 'Lütfen bir API anahtarı girin',
         errorInvalidKey: 'Geçersiz API anahtarı veya sunucu hatası. Lütfen anahtarınızı kontrol edin ve tekrar deneyin.',
         demoTitle: 'Çalışırken Görün',
-        demoSubtitle: 'Mentalist modüllerinin gerçek senaryolarda nasıl çalıştığını izleyin'
+        demoSubtitle: 'Mentalist modüllerinin gerçek senaryolarda nasıl çalıştığını izleyin',
+        downloadTokenTitle: 'Tokeninizi Girin',
+        downloadTokenDesc: 'Dosyaları indirmek için geçerli bir abonelik tokeni gereklidir.',
+        downloadTokenPlaceholder: 'API tokeninizi buraya yapıştırın...',
+        downloadTokenBtn: 'İndir',
+        downloadTokenChecking: 'Doğrulanıyor...',
+        downloadTokenError: 'Geçersiz token veya hesap devre dışı.',
+        downloadTokenGeoError: 'İndirmeler bölgenizde mevcut değil.',
+        downloadTokenNetError: 'Sunucu bağlantı hatası. Lütfen tekrar deneyin.',
+        noVersionAvailable: 'Henüz indirilebilir sürüm yok.',
+        downloadError: 'İndirme hatası. Lütfen tekrar deneyin.'
     },
     ru: {
         about: 'О программе',
@@ -519,7 +647,17 @@ const translations = {
         errorEnterKey: 'Пожалуйста, введите API ключ',
         errorInvalidKey: 'Неверный API ключ или ошибка сервера. Проверьте ключ и попробуйте снова.',
         demoTitle: 'Смотрите в действии',
-        demoSubtitle: 'Наблюдайте за работой модулей Mentalist в реальных сценариях'
+        demoSubtitle: 'Наблюдайте за работой модулей Mentalist в реальных сценариях',
+        downloadTokenTitle: 'Введите ваш токен',
+        downloadTokenDesc: 'Для скачивания файлов необходим действующий токен подписки.',
+        downloadTokenPlaceholder: 'Вставьте ваш API токен сюда...',
+        downloadTokenBtn: 'Скачать',
+        downloadTokenChecking: 'Проверяем...',
+        downloadTokenError: 'Неверный токен или аккаунт отключён.',
+        downloadTokenGeoError: 'Загрузки недоступны в вашем регионе.',
+        downloadTokenNetError: 'Ошибка подключения к серверу. Попробуйте позже.',
+        noVersionAvailable: 'Версия для загрузки пока недоступна.',
+        downloadError: 'Ошибка загрузки. Попробуйте снова.'
     }
 };
 
@@ -763,14 +901,14 @@ function switchLanguage(lang) {
         const d = versionData[type];
 
         if (versionEl)
-            versionEl.textContent = d.version
-                ? `${t.versionLabel}: ${d.version}`
-                : (t[`version${type === 'mobile' ? 'Tbd' : ''}`] || t.version);
+            versionEl.textContent = d.version ?
+            `${t.versionLabel}: ${d.version}` :
+            (t[`version${type === 'mobile' ? 'Tbd' : ''}`] || t.version);
 
         if (sizeEl)
-            sizeEl.textContent = d.size
-                ? `${t.sizeLabel}: ${d.size}`
-                : (t[`size${type.charAt(0).toUpperCase() + type.slice(1)}`] || t.sizeCli);
+            sizeEl.textContent = d.size ?
+            `${t.sizeLabel}: ${d.size}` :
+            (t[`size${type.charAt(0).toUpperCase() + type.slice(1)}`] || t.sizeCli);
     });
 
     document.querySelectorAll('.lang-btn').forEach(btn => {
@@ -822,16 +960,15 @@ async function generateHmacSha256(key, message) {
     const msgData = encoder.encode(message);
 
     const cryptoKey = await window.crypto.subtle.importKey(
-        'raw', 
-        keyData, 
-        { name: 'HMAC', hash: 'SHA-256' }, 
-        false, 
+        'raw',
+        keyData, { name: 'HMAC', hash: 'SHA-256' },
+        false,
         ['sign']
     );
 
     const signature = await window.crypto.subtle.sign(
-        'HMAC', 
-        cryptoKey, 
+        'HMAC',
+        cryptoKey,
         msgData
     );
 
@@ -859,7 +996,7 @@ async function verifyKey() {
     const resultDiv = document.getElementById('verifyResult');
     const t = translations[currentLang];
 
-    const SERVER_URL = 'https://mentalist.corruptor.pro'; 
+    const SERVER_URL = 'https://mentalist.corruptor.pro';
 
     resultDiv.classList.add('hidden');
     resultDiv.className = 'verify-result';
@@ -878,7 +1015,7 @@ async function verifyKey() {
     try {
         const challengeRes = await fetch(`${SERVER_URL}/auth/challenge`, {
             method: 'POST',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ api_key: apiKey })
@@ -906,7 +1043,7 @@ async function verifyKey() {
 
         const verifyRes = await fetch(`${SERVER_URL}/auth/verify`, {
             method: 'POST',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
@@ -939,7 +1076,7 @@ async function verifyKey() {
             8: 'SPINNER',
             16: 'MASTERMIND'
         };
-        
+
         const hasAccess = (perm, flag) => (perm & flag) !== 0;
 
         const modules = Object.entries(moduleNames).map(([flag, name]) => ({
@@ -982,54 +1119,146 @@ async function verifyKey() {
     }
 }
 
-async function downloadFile(type) {
+let _pendingDownloadType = null;
+
+function downloadFile(type) {
+    const t = translations[currentLang];
+
+    _pendingDownloadType = type;
+
+    const modal = document.getElementById('downloadTokenModal');
+    const input = document.getElementById('downloadTokenInput');
+    const errEl = document.getElementById('downloadTokenError');
+    const titleEl = document.getElementById('downloadModalTitle');
+    const descEl = document.getElementById('downloadModalDesc');
+    const btnEl = document.getElementById('downloadTokenBtn');
+    const btnTxtEl = document.getElementById('downloadTokenBtnText');
+
+    titleEl.textContent = t.downloadTokenTitle || 'Enter Your Token';
+    descEl.textContent = t.downloadTokenDesc || 'A valid subscription token is required to download files.';
+    input.placeholder = t.downloadTokenPlaceholder || 'Paste your API token here...';
+    btnTxtEl.textContent = t.downloadTokenBtn || 'Download';
+    errEl.textContent = '';
+    input.value = '';
+    input.style.borderColor = '';
+
+    modal.classList.add('active');
+
+    setTimeout(() => input.focus(), 120);
+}
+
+function closeDownloadModal() {
+    const modal = document.getElementById('downloadTokenModal');
+    modal.classList.remove('active');
+
+    _pendingDownloadType = null;
+}
+
+async function confirmDownloadWithToken() {
     const t = translations[currentLang];
     const SERVER_URL = 'https://mentalist.corruptor.pro';
 
+    const input = document.getElementById('downloadTokenInput');
+    const errEl = document.getElementById('downloadTokenError');
+    const btnTxtEl = document.getElementById('downloadTokenBtnText');
+    const btnEl = document.getElementById('downloadTokenBtn');
+
+    const token = input.value.trim();
+    const type = _pendingDownloadType;
+
+    if (!token) {
+        errEl.textContent = t.errorEnterKey || 'Please enter an API key';
+        input.style.borderColor = '#ff6b6b';
+
+        return;
+    }
+
+    btnTxtEl.textContent = t.downloadTokenChecking || 'Verifying...';
+    btnEl.disabled = true;
+    errEl.textContent = '';
+    input.style.borderColor = '';
+
     try {
-        const response = await fetch(`${SERVER_URL}/api/update/check?build_type=${type}`);
-        
-        if (!response.ok) throw new Error(`Server error: ${response.status}`);
+        const checkRes = await fetch(`${SERVER_URL}/api/update/check?build_type=${type}`);
 
-        const data = await response.json();
+        if (!checkRes.ok) throw new Error('check_failed');
 
-        if (!data.update_available && !data.latest_version) {
-            alert(t.noVersionAvailable);
+        const checkData = await checkRes.json();
 
-            return;
-        }
-
-        const version = data.latest_version.version;
-
-        if (!version) {
-            alert(t.noVersionAvailable);
+        if (!checkData.update_available || !checkData.latest_version) {
+            errEl.textContent = t.noVersionAvailable || 'No version available yet.';
 
             return;
         }
 
-        const downloadUrl = `${SERVER_URL}/api/update/download?version=${version}&build_type=${type}`;
+        const version = checkData.latest_version.version;
 
+        const dlRes = await fetch(
+            `${SERVER_URL}/api/update/download/web?version=${version}&build_type=${type}`, {
+                headers: {
+                    'X-API-Key': token
+                }
+            }
+        );
+
+        if (dlRes.status === 401 || dlRes.status === 403) {
+            const body = await dlRes.json().catch(() => ({}));
+            const msg = body.error || '';
+
+            if (msg.toLowerCase().includes('region'))
+                errEl.textContent = t.downloadTokenGeoError || 'Downloads are not available in your region.';
+            
+            else
+                errEl.textContent = t.downloadTokenError || 'Invalid token or account disabled.';
+
+            input.style.borderColor = '#ff6b6b';
+
+            return;
+        }
+
+        if (!dlRes.ok) throw new Error('download_failed');
+
+        const blob = await dlRes.blob();
+        const disposition = dlRes.headers.get('Content-Disposition') || '';
+        let filename = `mentalist_${type}.exe`;
+
+        const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+
+        if (match && match[1]) filename = match[1].replace(/['"]/g, '');
+
+        const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.download = '';
-
+        link.href = url;
+        link.download = filename;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-    } catch (error) {
-        console.error('Download error:', error);
 
-        alert(t.downloadError);
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+        closeDownloadModal();
+
+    } catch (err) {
+        console.error('Download error:', err);
+
+        if (err.message === 'Failed to fetch')
+            errEl.textContent = t.downloadTokenNetError || 'Server connection error. Please try again later.';
+
+        else
+            errEl.textContent = t.downloadError || 'Download error. Please try again.';
+    } finally {
+        btnTxtEl.textContent = t.downloadTokenBtn || 'Download';
+        btnEl.disabled = false;
     }
 }
 
 async function loadVersionInfo() {
-    const SERVER_URL = 'https://mentalist.corruptor.pro'
+    const SERVER_URL = 'https://mentalist.corruptor.pro';
     const t = translations[currentLang];
 
     try {
         const response = await fetch(`${SERVER_URL}/api/update/versions`);
-        
+
         if (!response.ok) return;
 
         const data = await response.json();
@@ -1038,7 +1267,7 @@ async function loadVersionInfo() {
             const cliVersionEl = document.querySelector('.download-card[data-type="cli"] .version-text');
             const cliSizeEl = document.querySelector('.download-card[data-type="cli"] .size-text');
             const cliBtn = document.querySelector('.download-card[data-type="cli"] .download-btn');
-            
+
             if (data.all_builds.cli && data.all_builds.cli.latest) {
                 const cliVersion = data.all_builds.cli.latest;
                 const cliSize = formatBytes(data.all_builds.cli.versions[data.all_builds.cli.versions.length - 1].size);
@@ -1047,7 +1276,7 @@ async function loadVersionInfo() {
                 versionData.cli.size = cliSize;
 
                 if (cliVersionEl) cliVersionEl.textContent = `${t.versionLabel}: ${cliVersion}`;
-                
+
                 if (cliSizeEl) cliSizeEl.textContent = `${t.sizeLabel}: ${cliSize}`;
 
                 if (cliBtn) {
@@ -1058,9 +1287,9 @@ async function loadVersionInfo() {
                 }
             } else {
                 if (cliVersionEl) cliVersionEl.textContent = t.versionTbd || 'Version: ---';
-                
+
                 if (cliSizeEl) cliSizeEl.textContent = 'Size: ---';
-                
+
                 if (cliBtn) {
                     cliBtn.textContent = t.comingSoon || 'Coming Soon...';
                     cliBtn.onclick = null;
@@ -1072,16 +1301,16 @@ async function loadVersionInfo() {
             const guiVersionEl = document.querySelector('.download-card[data-type="gui"] .version-text');
             const guiSizeEl = document.querySelector('.download-card[data-type="gui"] .size-text');
             const guiBtn = document.querySelector('.download-card[data-type="gui"] .download-btn');
-            
+
             if (data.all_builds.gui && data.all_builds.gui.latest) {
                 const guiVersion = data.all_builds.gui.latest;
                 const guiSize = formatBytes(data.all_builds.gui.versions[data.all_builds.gui.versions.length - 1].size);
-                
+
                 versionData.gui.version = guiVersion;
                 versionData.gui.size = guiSize;
 
                 if (guiVersionEl) guiVersionEl.textContent = `${t.versionLabel}: ${guiVersion}`;
-                
+
                 if (guiSizeEl) guiSizeEl.textContent = `${t.sizeLabel}: ${guiSize}`;
 
                 if (guiBtn) {
@@ -1092,9 +1321,9 @@ async function loadVersionInfo() {
                 }
             } else {
                 if (guiVersionEl) guiVersionEl.textContent = t.versionTbd || 'Version: ---';
-                
+
                 if (guiSizeEl) guiSizeEl.textContent = 'Size: ---';
-                
+
                 if (guiBtn) {
                     guiBtn.textContent = t.comingSoon || 'Coming Soon...';
                     guiBtn.onclick = null;
@@ -1106,18 +1335,18 @@ async function loadVersionInfo() {
             const mobileVersionEl = document.querySelector('.download-card[data-type="mobile"] .version-text');
             const mobileSizeEl = document.querySelector('.download-card[data-type="mobile"] .size-text');
             const mobileBtn = document.querySelector('.download-card[data-type="mobile"] .download-btn');
-            
+
             if (data.all_builds.mobile && data.all_builds.mobile.latest) {
                 const mobileVersion = data.all_builds.mobile.latest.version;
                 const mobileSize = formatBytes(data.all_builds.mobile.versions[data.all_builds.mobile.versions.length - 1].size);
-                
+
                 versionData.mobile.version = mobileVersion;
                 versionData.mobile.size = mobileSize;
 
                 if (mobileVersionEl) mobileVersionEl.textContent = `${t.versionLabel}: ${mobileVersion}`;
-                
+
                 if (mobileSizeEl) mobileSizeEl.textContent = `${t.sizeLabel}: ${mobileSize}`;
- 
+
                 if (mobileBtn) {
                     mobileBtn.textContent = 'Download Mobile';
                     mobileBtn.onclick = () => downloadFile('mobile');
@@ -1126,9 +1355,9 @@ async function loadVersionInfo() {
                 }
             } else {
                 if (mobileVersionEl) mobileVersionEl.textContent = t.versionTbd || 'Version: ---';
-                
+
                 if (mobileSizeEl) mobileSizeEl.textContent = 'Size: ---';
-                
+
                 if (mobileBtn) {
                     mobileBtn.textContent = t.comingSoon || 'Coming Soon...';
                     mobileBtn.onclick = null;
@@ -1193,7 +1422,7 @@ function updateWizard() {
 
     if (nextBtn) {
         if (currentStep === totalSteps) nextBtn.style.display = 'none';
-        
+
         else {
             nextBtn.style.display = 'block';
             nextBtn.disabled = false;
@@ -1216,7 +1445,7 @@ function copyConfig() {
 
             btn.textContent = currentLang === 'ru' ? 'Скопировано!' : currentLang === 'tr' ? 'Kopyalandı!' : 'Copied!';
             btn.style.background = 'var(--state-success)';
-            
+
             setTimeout(() => {
                 btn.textContent = originalText;
                 btn.style.background = '';
@@ -1227,8 +1456,7 @@ function copyConfig() {
     });
 }
 
-const demoSlides = [
-    {
+const demoSlides = [{
         type: 'video',
         src: 'static/videos/tracker_demo.mp4',
         title: { en: 'TRACKER in Action', ru: 'TRACKER в действии', tr: 'TRACKER Çalışıyor' },
@@ -1272,7 +1500,7 @@ function initDemoSlider() {
                     <h3 class="slide-title" data-slide="${i}"></h3>
                     <p class="slide-subtitle" data-slide-sub="${i}"></p>
                 </div>`;
-        
+
         else
             el.innerHTML = `
                 <img class="slide-media" src="${slide.src}" alt="">
@@ -1301,7 +1529,7 @@ function updateSlideTexts() {
         const subEl = document.querySelector(`[data-slide-sub="${i}"]`);
 
         if (titleEl) titleEl.textContent = slide.title[currentLang] || slide.title.en;
-        
+
         if (subEl) subEl.textContent = slide.subtitle[currentLang] || slide.subtitle.en;
     });
 }
@@ -1372,7 +1600,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (userLang.startsWith('tr')) switchLanguage('tr');
 
-    else if (userLang.startsWith('ru')) switchLanguage('ru'); 
+    else if (userLang.startsWith('ru')) switchLanguage('ru');
 
     document.querySelectorAll('.lang-btn').forEach(btn => {
         btn.addEventListener('click', () => switchLanguage(btn.dataset.lang))
@@ -1423,4 +1651,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (document.querySelector('.wizard-content')) updateWizard();
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const dlModal = document.getElementById('downloadTokenModal');
+
+            if (dlModal && dlModal.classList.contains('active')) closeDownloadModal();
+        }
+    });
+
+    const tokenInput = document.getElementById('downloadTokenInput');
+
+    if (tokenInput) {
+        tokenInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') confirmDownloadWithToken();
+        });
+    }
 });

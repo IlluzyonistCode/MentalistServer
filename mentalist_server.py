@@ -1,24 +1,146 @@
 import sqlite3
 import threading
 import hashlib
+import queue
 import json
 import hmac
 import secrets
+import string
 import os
 import re
 import time
-import queue
+import random
 import logging
 from datetime import datetime
 from pathlib import Path
-from flask import Flask, request, jsonify, send_file, send_from_directory
+from flask import Flask, request, jsonify, send_file, send_from_directory, Response
 from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.utils import secure_filename
 from functools import wraps
 
+class JSObfuscator:
+    def __init__(self):
+        self.name_mapping = {}
+
+        self._generate_names()
+    
+    def _generate_names(self):
+        random.seed(42)
+        
+        self.name_mapping = {
+            'collectBrowserFingerprint': self._random_name(),
+            'detectWebRTCLeak': self._random_name(),
+            'measureRoundTripTime': self._random_name()
+        }
+    
+    def _random_name(self):
+        chars = string.hexdigits[:16]
+
+        return '_0x' + ''.join(random.choices(chars, k=6))
+    
+    def _minify_security_section(self, code):
+        code = re.sub(r'//.*?\n', '\n', code)
+        code = re.sub(r'/\*.*?\*/', '', code, flags=re.DOTALL)
+        code = re.sub(r'\n\s*\n', '\n', code)
+        code = re.sub(r'    ', '', code)
+        code = re.sub(r';\s+', ';', code)
+        code = re.sub(r'\{\s+', '{', code)
+        code = re.sub(r'\s+\}', '}', code)
+        code = re.sub(r',\s+', ',', code)
+        
+        return code
+    
+    def obfuscate(self, js_code):
+        security_start = js_code.find('async function collectBrowserFingerprint()')
+        security_end = js_code.find('const translations = {')
+        
+        if security_start == -1 or security_end == -1:
+            return js_code
+        
+        before_security = js_code[:security_start]
+        security_code = js_code[security_start:security_end]
+        after_security = js_code[security_end:]
+        
+        for original, obfuscated in self.name_mapping.items():
+            security_code = re.sub(r'\b' + original + r'\b', obfuscated, security_code)
+            after_security = re.sub(r'\b' + original + r'\b', obfuscated, after_security)
+        
+        security_code = self._minify_security_section(security_code)
+        
+        dummy_vars = '\n'.join([
+            f'const _dummy{i}={random.randint(1000,9999)};'
+            for i in range(3)
+        ])
+        
+        security_code = dummy_vars + '\n' + security_code
+        
+        return before_security + security_code + after_security
+
+
+_obfuscator = JSObfuscator()
+
+
+def check_geoip_databases():
+    databases = {
+        'GeoLite2-Country.mmdb': 'Country-level GeoIP',
+        'GeoLite2-City.mmdb': 'City-level GeoIP',
+        'GeoLite2-ASN.mmdb': 'ASN-level VPN detection'
+    }
+    
+    all_present = True
+    
+    for db_name in databases:
+        db_path = DATA_DIR / db_name
+
+        if not db_path.exists():
+            all_present = False
+
+            print(f'[WARNING] {db_name} not found in {DATA_DIR}/')
+    
+    if not all_present:
+        print('')
+        print('=' * 60)
+        print('GeoIP Databases Missing!')
+        print('=' * 60)
+        print('')
+        print('Download from MaxMind:')
+        print('https://dev.maxmind.com/geoip/geolite2-free-geolocation-data')
+        print('')
+        print(f'Place in: {DATA_DIR.absolute()}/')
+        print('  - GeoLite2-Country.mmdb')
+        print('  - GeoLite2-City.mmdb')
+        print('  - GeoLite2-ASN.mmdb')
+        print('')
+
+        return False
+    
+    try:
+        import geoip2.database
+        
+        country_db = DATA_DIR / 'GeoLite2-Country.mmdb'
+
+        with geoip2.database.Reader(str(country_db)) as reader:
+            response = reader.country('8.8.8.8')
+
+            print(f'[GEOIP] Country DB working (8.8.8.8 -> {response.country.iso_code})')
+        
+        return True
+    except ImportError:
+        print('[ERROR] geoip2 module not installed')
+        print('Install: pip3 install geoip2 --break-system-packages')
+
+        return False
+    except Exception as e:
+        print(f'[ERROR] GeoIP database error: {e}')
+
+        return False
+
+
 SERVER_PORT = 1101
 API_SECRET = os.environ.get('MENTALIST_API_SECRET')
+PRODUCTION = os.environ.get('PRODUCTION', 'false').lower() == 'true'
+
 DATA_DIR = Path('server_data')
 UPDATE_DIR = Path('updates')
 BACKUP_DIR = Path('backups')
@@ -52,6 +174,7 @@ logger = logging.getLogger('MentalistServer')
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
 CORS(app)
 
 server_data = {
@@ -88,6 +211,27 @@ usage_buffer_lock = threading.Lock()
 
 request_logs_queue = queue.Queue()
 user_sessions_queue = queue.Queue()
+
+BLOCKED_COUNTRIES = {'DE'}
+BLOCKED_CITIES = {
+    'Saint Petersburg': 'RU',
+    'Antalya': 'TR'
+}
+
+VPN_ASN_PREFIXES = [
+    'AS13335',
+    'AS14061',
+    'AS63949',
+    'AS54290',
+    'AS46562',
+    'AS32613',
+    'AS40244',
+    'AS36351',
+    'AS9009',
+    'AS62468'
+]
+
+HOSTING_ASN_KEYWORDS = ['hosting', 'cloud', 'datacenter', 'server', 'virtual', 'vps', 'dedicated']
 
 
 def get_db_connection():
@@ -153,8 +297,19 @@ def init_database():
         )
     ''')
     
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS security_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ip_address TEXT,
+            threat_type TEXT,
+            details TEXT,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
     conn.commit()
     conn.close()
+
     logger.info('Database initialized successfully')
 
 def generate_api_key():
@@ -185,6 +340,7 @@ def create_user(permissions=31):
         )
         
         conn.commit()
+
         logger.info(f'Created user with API key: {api_key[:16]}... (permissions: {permissions})')
 
         return api_key
@@ -253,6 +409,22 @@ def log_request(user_id, ip_address, module, endpoint):
         if module_key in usage_buffer[user_id]:
             usage_buffer[user_id][module_key] += 1
 
+def log_security_event(ip, threat_type, details):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(
+            'INSERT INTO security_logs (ip_address, threat_type, details) VALUES (?, ?, ?)',
+            (ip, threat_type, json.dumps(details))
+        )
+
+        conn.commit()
+    except Exception as e:
+        logger.error(f'Failed to log security event: {e}')
+    finally:
+        conn.close()
+
 def flush_usage_buffer():
     while True:
         time.sleep(FLUSH_INTERVAL)
@@ -278,98 +450,376 @@ def flush_usage_buffer():
                         mastermind_requests = mastermind_requests + ?
                     WHERE user_id = ?
                 ''', (
-                    counts['tracker'],
-                    counts['stalker'],
-                    counts['booster'],
-                    counts['spinner'],
-                    counts['mastermind'],
+                    counts.get('tracker', 0),
+                    counts.get('stalker', 0),
+                    counts.get('booster', 0),
+                    counts.get('spinner', 0),
+                    counts.get('mastermind', 0),
                     user_id
                 ))
             
             conn.commit()
             conn.close()
+
             logger.info(f'Flushed usage stats for {len(snapshot)} users')
         except Exception as e:
             logger.error(f'Error flushing usage buffer: {e}')
 
 def flush_request_logs():
+    batch_size = 100
+    batch = []
+    
     while True:
-        time.sleep(60)
-        
-        logs_batch = []
-        
         try:
-            while not request_logs_queue.empty():
-                logs_batch.append(request_logs_queue.get_nowait())
+            item = request_logs_queue.get(timeout=5)
+
+            batch.append(item)
+            
+            if len(batch) >= batch_size:
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                
+                for log_entry in batch:
+                    cursor.execute('''
+                        INSERT INTO request_logs (user_id, ip_address, module, endpoint, timestamp)
+                        VALUES (?, ?, ?, ?, ?)
+                    ''', (
+                        log_entry['user_id'],
+                        log_entry['ip_address'],
+                        log_entry['module'],
+                        log_entry['endpoint'],
+                        log_entry['timestamp']
+                    ))
+                
+                conn.commit()
+                conn.close()
+                
+                batch = []
         except queue.Empty:
-            pass
-        
-        if not logs_batch:
-            continue
-        
-        try:
-            conn = get_db_connection()
-            cursor = conn.cursor()
-            
-            for log_entry in logs_batch:
-                cursor.execute('''
-                    INSERT INTO request_logs (user_id, ip_address, module, endpoint, timestamp)
-                    VALUES (?, ?, ?, ?, ?)
-                ''', (
-                    log_entry['user_id'],
-                    log_entry['ip_address'],
-                    log_entry['module'],
-                    log_entry['endpoint'],
-                    log_entry['timestamp']
-                ))
-            
-            conn.commit()
-            conn.close()
-            logger.info(f'Flushed {len(logs_batch)} request logs')
-        except Exception as e:
-            logger.error(f'Error flushing request logs: {e}')
-            
-            for log_entry in logs_batch:
-                request_logs_queue.put(log_entry)
+            if batch:
+                try:
+                    conn = get_db_connection()
+                    cursor = conn.cursor()
+                    
+                    for log_entry in batch:
+                        cursor.execute('''
+                            INSERT INTO request_logs (user_id, ip_address, module, endpoint, timestamp)
+                            VALUES (?, ?, ?, ?, ?)
+                        ''', (
+                            log_entry['user_id'],
+                            log_entry['ip_address'],
+                            log_entry['module'],
+                            log_entry['endpoint'],
+                            log_entry['timestamp']
+                        ))
+                    
+                    conn.commit()
+                    conn.close()
+                    
+                    batch = []
+                except Exception as e:
+                    logger.error(f'Error flushing request logs: {e}')
 
 def flush_user_sessions():
+    batch_size = 50
+    batch = []
+    
     while True:
-        time.sleep(30)
-        
-        sessions_batch = []
-        
         try:
-            while not user_sessions_queue.empty():
-                sessions_batch.append(user_sessions_queue.get_nowait())
+            item = user_sessions_queue.get(timeout=10)
+            batch.append(item)
+            
+            if len(batch) >= batch_size:
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                
+                for session in batch:
+                    cursor.execute('''
+                        INSERT INTO user_sessions (user_id, ip_address, system_info)
+                        VALUES (?, ?, ?)
+                    ''', (
+                        session['user_id'],
+                        session['ip_address'],
+                        session['system_info']
+                    ))
+                
+                conn.commit()
+                conn.close()
+                
+                batch = []
         except queue.Empty:
-            pass
+            if batch:
+                try:
+                    conn = get_db_connection()
+                    cursor = conn.cursor()
+                    
+                    for session in batch:
+                        cursor.execute('''
+                            INSERT INTO user_sessions (user_id, ip_address, system_info)
+                            VALUES (?, ?, ?)
+                        ''', (
+                            session['user_id'],
+                            session['ip_address'],
+                            session['system_info']
+                        ))
+                    
+                    conn.commit()
+                    conn.close()
+                    
+                    batch = []
+                except Exception as e:
+                    logger.error(f'Error flushing user sessions: {e}')
+
+def get_geoip_country(ip):
+    try:
+        import geoip2.database
+
+        db_path = DATA_DIR / 'GeoLite2-Country.mmdb'
+
+        if not db_path.exists():
+            return
+
+        with geoip2.database.Reader(str(db_path)) as reader:
+            response = reader.country(ip)
+
+            return response.country.iso_code
+    except Exception:
+        pass
+
+def get_geoip_city(ip):
+    try:
+        import geoip2.database
+
+        db_path = DATA_DIR / 'GeoLite2-City.mmdb'
+
+        if not db_path.exists():
+            return None, None
+
+        with geoip2.database.Reader(str(db_path)) as reader:
+            response = reader.city(ip)
+
+            return response.city.name, response.country.iso_code
+    except Exception:
+        return None, None
+
+def get_asn_info(ip):
+    try:
+        import geoip2.database
+
+        db_path = DATA_DIR / 'GeoLite2-ASN.mmdb'
+
+        if not db_path.exists():
+            return None, None
+
+        with geoip2.database.Reader(str(db_path)) as reader:
+            response = reader.asn(ip)
+
+            return response.autonomous_system_number, response.autonomous_system_organization
+    except Exception:
+        return None, None
+
+def is_vpn_or_proxy(ip):
+    asn, org = get_asn_info(ip)
+    
+    if asn:
+        asn_str = f'AS{asn}'
+
+        if asn_str in VPN_ASN_PREFIXES:
+            return True, f'Known VPN ASN: {asn_str}'
+    
+    if org:
+        org_lower = org.lower()
+
+        for keyword in HOSTING_ASN_KEYWORDS:
+            if keyword in org_lower:
+                return True, f'Hosting/VPN provider: {org}'
+    
+    return False, None
+
+def analyze_rtt_anomaly(client_rtt, ip):
+    if not client_rtt:
+        return False, None
+    
+    try:
+        rtt_ms = float(client_rtt)
         
-        if not sessions_batch:
-            continue
+        country = get_geoip_country(ip)
         
-        try:
-            conn = get_db_connection()
-            cursor = conn.cursor()
+        expected_rtt_ranges = {
+            'US': (10, 100),
+            'GB': (20, 120),
+            'DE': (15, 110),
+            'FR': (18, 115),
+            'JP': (100, 250),
+            'AU': (150, 300)
+        }
+        
+        if country in expected_rtt_ranges:
+            min_rtt, max_rtt = expected_rtt_ranges[country]
             
-            for session_entry in sessions_batch:
-                cursor.execute('''
-                    INSERT INTO user_sessions (user_id, ip_address, system_info)
-                    VALUES (?, ?, ?)
-                ''', (
-                    session_entry['user_id'],
-                    session_entry['ip_address'],
-                    session_entry['system_info']
-                ))
+            if rtt_ms < min_rtt * 0.3 or rtt_ms > max_rtt * 2.5:
+                return True, f'RTT anomaly: {rtt_ms}ms for country {country}'
+        
+        if rtt_ms > 500:
+            return True, f'Excessive RTT: {rtt_ms}ms'
+    except (ValueError, TypeError):
+        pass
+    
+    return False, None
+
+def check_geo_block(request_obj):
+    ip = request_obj.remote_addr
+    
+    country = get_geoip_country(ip)
+
+    if country and country in BLOCKED_COUNTRIES:
+        log_security_event(ip, 'geo_block_country', {'country': country})
+
+        logger.info(f'Geo-blocked request from {ip} (country: {country})')
+
+        return True, 'Access restricted in your region'
+    
+    city, city_country = get_geoip_city(ip)
+
+    if city and city in BLOCKED_CITIES:
+        if BLOCKED_CITIES[city] == city_country:
+            log_security_event(ip, 'geo_block_city', {'city': city, 'country': city_country})
+
+            logger.info(f'City-blocked request from {ip} (city: {city})')
+
+            return True, 'Access restricted in your region'
+    
+    accept_lang = request_obj.headers.get('Accept-Language', '')
+    blocked_lang_prefixes = ('de-DE', 'de-AT', 'de-CH', 'de,')
+
+    if any(accept_lang.startswith(p) for p in blocked_lang_prefixes):
+        if country is None or country in BLOCKED_COUNTRIES:
+            log_security_event(ip, 'geo_block_language', {'language': accept_lang})
+
+            logger.info(f'Language-based geo-block for {ip} (lang: {accept_lang})')
+
+            return True, 'Access restricted in your region'
+    
+    is_vpn, vpn_reason = is_vpn_or_proxy(ip)
+
+    if is_vpn and (country in BLOCKED_COUNTRIES or country is None):
+        log_security_event(ip, 'vpn_detected', {'reason': vpn_reason, 'country': country})
+
+        logger.info(f'VPN/Proxy blocked from {ip}: {vpn_reason}')
+
+        return True, 'VPN/Proxy connections are not allowed'
+    
+    client_rtt = request_obj.headers.get('X-Client-RTT')
+    rtt_anomaly, rtt_reason = analyze_rtt_anomaly(client_rtt, ip)
+
+    if rtt_anomaly:
+        log_security_event(ip, 'rtt_anomaly', {'reason': rtt_reason, 'country': country})
+
+        logger.info(f'RTT anomaly detected for {ip}: {rtt_reason}')
+
+        return True, 'Network anomaly detected'
+    
+    return False, None
+
+def check_fingerprint_mismatch(request_obj):
+    fp_data = request_obj.headers.get('X-Fingerprint')
+
+    if not fp_data:
+        return False, None
+    
+    try:
+        fp = json.loads(fp_data)
+        
+        timezone = fp.get('timezone')
+        languages = fp.get('languages', [])
+        ip = request_obj.remote_addr
+        country = get_geoip_country(ip)
+        
+        if country == 'US':
+            us_timezones = ['America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles', 'America/Phoenix']
+
+            if timezone and timezone not in us_timezones and 'America/' not in timezone:
+                return True, f'Timezone mismatch: {timezone} for US IP'
+        
+        if country == 'DE' or 'de' in languages or 'de-DE' in languages:
+            return True, 'German locale detected with non-German IP'
+        
+    except json.JSONDecodeError:
+        pass
+    
+    return False, None
+
+def is_client_request(request_obj):
+    user_agent = request_obj.headers.get('User-Agent', '').lower()
+    
+    if 'mentalist' in user_agent:
+        return True
+    
+    if 'python' in user_agent or 'requests' in user_agent or 'urllib' in user_agent:
+        return True
+    
+    x_client_type = request_obj.headers.get('X-Client-Type')
+
+    if x_client_type in ['cli', 'gui', 'mobile']:
+        return True
+    
+    return False
+
+def require_auth(module=None):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            api_key = request.headers.get('X-API-Key')
             
-            conn.commit()
-            conn.close()
+            if not api_key:
+                return jsonify({'error': 'Missing API key'}), 401
+            
+            if module:
+                valid, result = verify_user_permissions(api_key, module)
                 
-            logger.info(f'Flushed {len(sessions_batch)} user sessions')
-        except Exception as e:
-            logger.error(f'Error flushing user sessions: {e}')
+                if not valid:
+                    return jsonify({'error': result}), 403
                 
-            for session_entry in sessions_batch:
-                user_sessions_queue.put(session_entry)
+                user_id = result
+
+                log_request(user_id, request.remote_addr, module, request.endpoint)
+
+            else:
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                cursor.execute('SELECT id, status FROM users WHERE api_key = ?', (api_key,))
+                result = cursor.fetchone()
+                conn.close()
+                
+                if not result or result[1] != 1:
+                    return jsonify({'error': 'Invalid or disabled API key'}), 401
+                
+                user_id = result[0]
+
+            update_last_connection(user_id)
+            
+            request.user_id = user_id
+            
+            return f(*args, **kwargs)
+        
+        return decorated_function
+    
+    return decorator
+
+def require_admin_auth(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        admin_token = request.headers.get('X-Admin-Token')
+        expected_token = API_SECRET
+        
+        if not admin_token or admin_token != expected_token:
+            logger.warning(f'Unauthorized admin access attempt from {request.remote_addr}')
+
+            return jsonify({'error': 'Unauthorized'}), 401
+        
+        return f(*args, **kwargs)
+    
+    return decorated_function
 
 def update_user_session(user_id, ip_address, system_info):
     user_sessions_queue.put({
@@ -431,6 +881,16 @@ def disable_user(api_key):
     
     logger.info(f'Disabled user: {api_key[:16]}...')
 
+def enable_user(api_key):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('UPDATE users SET status = 1 WHERE api_key = ?', (api_key,))
+    conn.commit()
+    conn.close()
+    
+    logger.info(f'Enabled user: {api_key[:16]}...')
+
 def delete_user(api_key):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -445,6 +905,7 @@ def delete_user(api_key):
         cursor.execute('DELETE FROM module_usage WHERE user_id = ?', (user_id,))
         cursor.execute('DELETE FROM users WHERE id = ?', (user_id,))
         conn.commit()
+
         logger.info(f'Deleted user: {api_key[:16]}...')
     
     conn.close()
@@ -471,61 +932,6 @@ def verify_challenge_response(challenge, response, api_key):
     
     return hmac.compare_digest(expected, response)
 
-def require_auth(module=None):
-    def decorator(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            api_key = request.headers.get('X-API-Key')
-            
-            if not api_key:
-                return jsonify({'error': 'Missing API key'}), 401
-            
-            if module:
-                valid, result = verify_user_permissions(api_key, module)
-                
-                if not valid:
-                    return jsonify({'error': result}), 403
-                
-                user_id = result
-                log_request(user_id, request.remote_addr, module, request.endpoint)
-
-            else:
-                conn = get_db_connection()
-                cursor = conn.cursor()
-                cursor.execute('SELECT id, status FROM users WHERE api_key = ?', (api_key,))
-                result = cursor.fetchone()
-                conn.close()
-                
-                if not result or result[1] != 1:
-                    return jsonify({'error': 'Invalid or disabled API key'}), 401
-                
-                user_id = result[0]
-
-            update_last_connection(user_id)
-            
-            request.user_id = user_id
-            
-            return f(*args, **kwargs)
-        
-        return decorated_function
-    
-    return decorator
-
-def require_admin_auth(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        admin_token = request.headers.get('X-Admin-Token')
-        expected_token = API_SECRET
-        
-        if not admin_token or admin_token != expected_token:
-            logger.warning(f'Unauthorized admin access attempt from {request.remote_addr}')
-
-            return jsonify({'error': 'Unauthorized'}), 401
-        
-        return f(*args, **kwargs)
-    
-    return decorated_function
-
 def load_versions_database():
     for build_type in BUILD_TYPES:
         versions_file = DATA_DIR / f'versions_{build_type}.json'
@@ -534,14 +940,18 @@ def load_versions_database():
             if versions_file.exists():
                 with open(versions_file, 'r', encoding='utf-8') as f:
                     data = json.load(f)
+                    
                     versions_db[build_type] = data
+
                     logger.info(f'Loaded {len(data.get("versions", []))} versions for {build_type}')
             
             else:
                 versions_db[build_type] = {'latest': None, 'versions': []}
+
                 logger.info(f'No versions file found for {build_type}, initialized empty')
         except Exception as e:
             logger.error(f'Error loading versions for {build_type}: {e}')
+
             versions_db[build_type] = {'latest': None, 'versions': []}
 
 def save_versions_database(build_type):
@@ -615,21 +1025,56 @@ def compare_versions(v1, v2):
     except:
         return 0
 
+
 @app.route('/')
 def index():
-    index_path = STATIC_DIR / 'index.html'
-
-    with open(index_path, 'r', encoding='utf-8') as f:
-        return f.read()
+    return send_from_directory(STATIC_DIR, 'index.html')
 
 @app.route('/static/<path:filename>')
 def serve_static(filename):
+    if PRODUCTION and filename == 'main.js':
+        filepath = STATIC_DIR / filename
+
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                original_content = f.read()
+            
+            content_hash = hashlib.md5(original_content.encode()).hexdigest()
+            cache_key = f'obfuscated_js_{content_hash}'
+
+            if not hasattr(app, '_obfuscation_cache'):
+                app._obfuscation_cache = {}
+            
+            if cache_key in app._obfuscation_cache:
+                obfuscated = app._obfuscation_cache[cache_key]
+
+            else:
+                obfuscated = _obfuscator.obfuscate(original_content)
+                app._obfuscation_cache[cache_key] = obfuscated
+
+                print(f'[OBFUSCATION] Obfuscated main.js ({len(original_content)} -> {len(obfuscated)} bytes)')
+            
+            return Response(obfuscated, mimetype='application/javascript')
+        except Exception as e:
+            print(f'[OBFUSCATION ERROR] {e}')
+
     file_path = STATIC_DIR / filename
 
     if file_path.exists() and file_path.is_file():
         return send_from_directory(STATIC_DIR, filename)
 
     return jsonify({'error': 'File not found'}), 404
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    uptime = (datetime.now() - stats['start_time']).total_seconds()
+
+    return jsonify({
+        'status': 'healthy',
+        'uptime_seconds': int(uptime),
+        'total_syncs': stats['total_syncs'],
+        'active_clients': len(stats['connected_clients'])
+    })
 
 @app.route('/auth/challenge', methods=['POST'])
 def auth_challenge():
@@ -721,17 +1166,6 @@ def update_tokens():
     )
 
     return jsonify({'success': True})
-
-@app.route('/health', methods=['GET'])
-def health_check():
-    uptime = (datetime.now() - stats['start_time']).total_seconds()
-
-    return jsonify({
-        'status': 'healthy',
-        'uptime_seconds': int(uptime),
-        'total_syncs': stats['total_syncs'],
-        'active_clients': len(stats['connected_clients'])
-    })
 
 @app.route('/sync/cards', methods=['POST'])
 @require_auth('tracker')
@@ -868,6 +1302,115 @@ def sync_role_profiles():
 
         return jsonify({'error': 'Internal server error'}), 500
 
+@app.route('/api/sync', methods=['POST'])
+@require_auth()
+def sync_data():
+    try:
+        data = request.get_json()
+        
+        update_last_connection(request.user_id)
+        
+        user_sessions_queue.put({
+            'user_id': request.user_id,
+            'ip_address': request.remote_addr,
+            'system_info': json.dumps({
+                'user_agent': request.headers.get('User-Agent'),
+                'platform': data.get('platform', 'unknown')
+            })
+        })
+        
+        client_cards = data.get('cards', {})
+        client_icons = data.get('icons', {})
+        client_profiles = data.get('role_profiles', {})
+        
+        server_updated = False
+        
+        if client_cards:
+            with data_locks['cards']:
+                server_data['cards'], cards_updated = merge_data(server_data['cards'], client_cards)
+                
+                if cards_updated:
+                    save_json_file('cards.json', server_data['cards'])
+
+                    server_updated = True
+                    
+                    with stats_lock:
+                        stats['cards_updates'] += 1
+        
+        if client_icons:
+            with data_locks['icons']:
+                server_data['icons'], icons_updated = merge_data(server_data['icons'], client_icons)
+                
+                if icons_updated:
+                    save_json_file('icons.json', server_data['icons'])
+
+                    server_updated = True
+                    
+                    with stats_lock:
+                        stats['icons_updates'] += 1
+        
+        if client_profiles:
+            with data_locks['role_profiles']:
+                server_data['role_profiles'], profiles_updated = merge_data(server_data['role_profiles'], client_profiles)
+                
+                if profiles_updated:
+                    save_json_file('role_profiles.json', server_data['role_profiles'])
+
+                    server_updated = True
+        
+        with stats_lock:
+            stats['total_syncs'] += 1
+            stats['last_sync'] = datetime.now().isoformat()
+            stats['connected_clients'].add(request.user_id)
+        
+        log_request(request.user_id, request.remote_addr, 'general', '/api/sync')
+        
+        response_data = {
+            'cards': server_data['cards'],
+            'icons': server_data['icons'],
+            'role_profiles': server_data['role_profiles'],
+            'cards_hash': calculate_hash(server_data['cards']),
+            'icons_hash': calculate_hash(server_data['icons']),
+            'server_updated': server_updated,
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        return jsonify(response_data), 200
+    except Exception as e:
+        logger.error(f'Error in sync_data: {e}')
+        
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/verify', methods=['POST'])
+@require_auth()
+def verify_key():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT permissions FROM users WHERE id = ?', (request.user_id,))
+        result = cursor.fetchone()
+        conn.close()
+
+        permissions = result[0] if result else 0
+
+        log_request(request.user_id, request.remote_addr, 'general', '/api/verify')
+        
+        return jsonify({
+            'valid': True,
+            'permissions': permissions,
+            'modules': {
+                'tracker': bool(permissions & MODULE_TRACKER),
+                'stalker': bool(permissions & MODULE_STALKER),
+                'booster': bool(permissions & MODULE_BOOSTER),
+                'spinner': bool(permissions & MODULE_SPINNER),
+                'mastermind': bool(permissions & MODULE_MASTERMIND)
+            }
+        }), 200
+    except Exception as e:
+        logger.error(f'Error in verify_key: {e}')
+        
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/update/check', methods=['GET'])
 def check_for_update():
     try:
@@ -914,6 +1457,35 @@ def check_for_update():
 
         return jsonify({'error': 'Internal server error'}), 500
 
+@app.route('/api/update/versions', methods=['GET'])
+def get_versions_list():
+    try:
+        build_type = request.args.get('build_type', '').lower()
+
+        if build_type:
+            if build_type not in BUILD_TYPES:
+                return jsonify({'error': f'Invalid build_type. Must be one of: {", ".join(BUILD_TYPES)}'}), 400
+            
+            return jsonify({
+                'build_type': build_type,
+                'latest': versions_db[build_type]['latest'],
+                'versions': versions_db[build_type]['versions']
+            }), 200
+
+        return jsonify({
+            'all_builds': {
+                build: {
+                    'latest': versions_db[build]['latest'],
+                    'versions': versions_db[build]['versions']
+                }
+                for build in BUILD_TYPES
+            }
+        }), 200
+    except Exception as e:
+        logger.error(f'Error getting versions list: {e}')
+
+        return jsonify({'error': 'Internal server error'}), 500
+
 @app.route('/api/update/download', methods=['GET'])
 def download_update():
     try:
@@ -951,32 +1523,53 @@ def download_update():
 
         return jsonify({'error': 'Internal server error'}), 500
 
-@app.route('/api/update/versions', methods=['GET'])
-def get_versions_list():
+@app.route('/api/update/download/web', methods=['GET'])
+@require_auth()
+def download_update_web():
     try:
-        build_type = request.args.get('build_type', '').lower()
+        blocked, reason = check_geo_block(request)
 
-        if build_type:
-            if build_type not in BUILD_TYPES:
-                return jsonify({'error': f'Invalid build_type. Must be one of: {", ".join(BUILD_TYPES)}'}), 400
-            
-            return jsonify({
-                'build_type': build_type,
-                'latest': versions_db[build_type]['latest'],
-                'versions': versions_db[build_type]['versions']
-            }), 200
+        if blocked:
+            return jsonify({'error': reason}), 403
+        
+        fp_mismatch, fp_reason = check_fingerprint_mismatch(request)
 
-        return jsonify({
-            'all_builds': {
-                build: {
-                    'latest': versions_db[build]['latest'],
-                    'versions': versions_db[build]['versions']
-                }
-                for build in BUILD_TYPES
-            }
-        }), 200
+        if fp_mismatch:
+            log_security_event(request.remote_addr, 'fingerprint_mismatch', {'reason': fp_reason})
+
+            return jsonify({'error': 'Security check failed'}), 403
+
+        version = request.args.get('version')
+        build_type = request.args.get('build_type', 'cli').lower()
+
+        if not version:
+            return jsonify({'error': 'Version parameter required'}), 400
+
+        if build_type not in BUILD_TYPES:
+            return jsonify({'error': f'Invalid build_type. Must be one of: {", ".join(BUILD_TYPES)}'}), 400
+
+        version_info = get_version_info(version, build_type)
+
+        if not version_info:
+            return jsonify({'error': f'Version not found for {build_type}'}), 404
+
+        file_path = UPDATE_DIR / build_type / version_info['filename']
+
+        if not file_path.exists():
+            logger.error(f'Update file not found: {file_path}')
+
+            return jsonify({'error': 'Update file not found'}), 404
+
+        logger.info(f'Web download: {build_type} v{version} to {request.remote_addr} (user_id: {request.user_id})')
+
+        return send_file(
+            file_path,
+            as_attachment=True,
+            download_name=version_info['filename'],
+            mimetype='application/octet-stream'
+        )
     except Exception as e:
-        logger.error(f'Error getting versions list: {e}')
+        logger.error(f'Error in web download: {e}')
 
         return jsonify({'error': 'Internal server error'}), 500
 
@@ -1047,6 +1640,43 @@ def upload_new_version():
     except Exception as e:
         logger.error(f'Error uploading new version: {e}')
 
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/stats', methods=['GET'])
+@require_admin_auth
+def admin_stats():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT COUNT(*) FROM users')
+        total_users = cursor.fetchone()[0]
+        
+        cursor.execute('SELECT COUNT(*) FROM users WHERE status = 1')
+        active_users = cursor.fetchone()[0]
+        
+        cursor.execute('SELECT COUNT(*) FROM request_logs WHERE timestamp > datetime("now", "-24 hours")')
+        requests_24h = cursor.fetchone()[0]
+        
+        conn.close()
+        
+        with stats_lock:
+            current_stats = dict(stats)
+            current_stats['connected_clients'] = len(current_stats['connected_clients'])
+        
+        return jsonify({
+            'server': current_stats,
+            'users': {
+                'total': total_users,
+                'active': active_users,
+                'disabled': total_users - active_users
+            },
+            'requests_24h': requests_24h,
+            'uptime': (datetime.now() - stats['start_time']).total_seconds()
+        }), 200
+    except Exception as e:
+        logger.error(f'Error in admin_stats: {e}')
+        
         return jsonify({'error': str(e)}), 500
 
 @app.route('/admin/create_user', methods=['POST'])
@@ -1177,6 +1807,69 @@ def admin_set_permissions():
         
         return jsonify({'error': str(e)}), 500
 
+@app.route('/admin/upload_version', methods=['POST'])
+@require_admin_auth
+def admin_upload_version():
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file provided'}), 400
+        
+        file = request.files['file']
+        build_type = request.form.get('build_type', 'cli').lower()
+        version = request.form.get('version')
+        changelog = request.form.get('changelog', '')
+        required = request.form.get('required', 'false').lower() == 'true'
+        
+        if not version:
+            return jsonify({'error': 'Version required'}), 400
+        
+        if not re.match(r'^\d+\.\d+\.\d+$', version):
+            return jsonify({'error': 'Invalid version format (use x.x.x)'}), 400
+        
+        if build_type not in BUILD_TYPES:
+            return jsonify({'error': f'Invalid build_type. Must be one of: {", ".join(BUILD_TYPES)}'}), 400
+        
+        extension_map = {
+            'cli': '.exe',
+            'gui': '.exe',
+            'mobile': '.zip'
+        }
+
+        extension = extension_map.get(build_type, '.exe')
+        filename = secure_filename(f'mentalist_{build_type}_v{version}{extension}')
+        build_dir = UPDATE_DIR / build_type
+        file_path = build_dir / filename
+        
+        file.save(str(file_path))
+        
+        checksum = calculate_file_checksum(file_path)
+        file_size = file_path.stat().st_size
+        
+        version_data = {
+            'version': version,
+            'filename': filename,
+            'build_type': build_type,
+            'size': file_size,
+            'checksum': checksum,
+            'release_date': datetime.now().isoformat(),
+            'changelog': changelog,
+            'required': required
+        }
+
+        add_new_version(version_data, build_type)
+        
+        logger.info(f'Uploaded new version: {build_type} v{version} ({filename}, {file_size} bytes)')
+        
+        return jsonify({
+            'success': True,
+            'version_info': version_data
+        }), 200
+    except Exception as e:
+        logger.error(f'Error in admin_upload_version: {e}')
+        
+        return jsonify({'error': str(e)}), 500
+
+
 def calculate_hash(data):
     json_str = json.dumps(data, sort_keys=True)
 
@@ -1239,6 +1932,7 @@ def cleanup_old_backups(prefix, days=30):
         if backup_file.stat().st_mtime < cutoff_time:
             try:
                 backup_file.unlink()
+
                 logger.info(f'Deleted old backup: {backup_file.name}')
             except Exception as e:
                 logger.error(f'Error deleting {backup_file.name}: {e}')
@@ -1285,6 +1979,7 @@ def initialize_update_system():
         build_dir.mkdir(exist_ok=True)
 
     load_versions_database()
+
     logger.info('Update system initialized')
 
 def periodic_backup():
@@ -1297,8 +1992,28 @@ def periodic_backup():
 
 
 if __name__ == '__main__':
+    print('')
+    print('=' * 60)
+    print('Mentalist Server - Enhanced Security (All-in-One)')
+    print('=' * 60)
+    print('')
+    
     initialize_server()
     initialize_update_system()
+    
+    geoip_ok = check_geoip_databases()
+
+    if not geoip_ok:
+        print('')
+        print('[WARNING] GeoIP databases not configured properly')
+        print('[WARNING] Geo-blocking features will not work!')
+        print('')
+    
+    if PRODUCTION:
+        logger.info('PRODUCTION MODE: Auto-obfuscation enabled for main.js')
+
+    else:
+        logger.info('DEVELOPMENT MODE: Serving original main.js')
 
     backup_thread = threading.Thread(target=periodic_backup, daemon=True)
     backup_thread.start()
@@ -1311,5 +2026,11 @@ if __name__ == '__main__':
     
     sessions_flush_thread = threading.Thread(target=flush_user_sessions, daemon=True)
     sessions_flush_thread.start()
+    
+    print('')
+    print('=' * 60)
+    print(f'Server started on http://0.0.0.0:{SERVER_PORT}')
+    print('=' * 60)
+    print('')
     
     app.run(host='0.0.0.0', port=SERVER_PORT, threaded=True)

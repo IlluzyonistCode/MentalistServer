@@ -346,14 +346,23 @@
                         <div class="code-block">
                             <button class="copy-btn" onclick="copyConfig()" data-i18n="copyToClipboard">Copy to Clipboard</button>
                             <pre id="configTemplate">TRACKER_API_KEYS=YOUR_WOLVESVILLE_API_KEY
+
 STALKER_API_KEYS=YOUR_WOLVESVILLE_API_KEY
+
 CHROME_EXECUTABLE=C:\Program Files\Google\Chrome\Application\chrome.exe
+
 CHROME_VIEWPORT=958,958
+
 CHROME_PROFILE=1
+
 BLUESTACKS5_EXECUTABLE=C:\Program Files\BlueStacks_nxt\HD-Player.exe
+
 BLUESTACKS5_NAME=Player
+
 SERVER_SYNC_ENABLED=true
+
 MENTALIST_SERVER_URL=https://mentalist.corruptor.pro
+
 MENTALIST_SERVER_API_KEY=YOUR_MENTALIST_API_KEY</pre>
                         </div>
                     </div>
@@ -544,6 +553,21 @@ MENTALIST_SERVER_API_KEY=YOUR_MENTALIST_API_KEY</pre>
             </div>
         </div>
     </footer>
+    <div id="downloadTokenModal" class="modal">
+        <div class="modal-overlay" onclick="closeDownloadModal()"></div>
+        <div class="modal-content" style="max-width:420px">
+            <button class="modal-close" onclick="closeDownloadModal()">✕</button>
+            <div id="downloadModalBody">
+                <h3 id="downloadModalTitle" style="margin-bottom:16px"></h3>
+                <p id="downloadModalDesc" style="margin-bottom:20px;opacity:0.7;font-size:14px"></p>
+                <input type="text" id="downloadTokenInput" placeholder="" style="width:100%;padding:12px 16px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:inherit;font-size:14px;box-sizing:border-box;margin-bottom:12px;outline:none" />
+                <div id="downloadTokenError" style="color:#ff6b6b;font-size:13px;min-height:18px;margin-bottom:12px"></div>
+                <button id="downloadTokenBtn" onclick="confirmDownloadWithToken()" style="width:100%;padding:12px;border-radius:8px;border:none;cursor:pointer;font-size:15px;font-weight:600;background:linear-gradient(135deg,#c9a227,#f0c040);color:#1a1a1a">
+                    <span id="downloadTokenBtnText"></span>
+                </button>
+            </div>
+        </div>
+    </div>
     <div id="moduleModal" class="modal">
         <div class="modal-overlay" onclick="closeModal()"></div>
         <div class="modal-content">
